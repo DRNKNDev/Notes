@@ -2,6 +2,7 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
+import { Button } from "@/components/ui/button";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -13,24 +14,24 @@ function App() {
   }
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <main className="max-w-4xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold text-center">Welcome to Tauri + React</h1>
 
-      <div className="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
+      <div className="flex justify-center items-center gap-6">
+        <a href="https://vitejs.dev" target="_blank" className="hover:scale-110 transition-transform">
+          <img src="/vite.svg" className="w-16 h-16" alt="Vite logo" />
         </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
+        <a href="https://tauri.app" target="_blank" className="hover:scale-110 transition-transform">
+          <img src="/tauri.svg" className="w-16 h-16" alt="Tauri logo" />
         </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
+        <a href="https://reactjs.org" target="_blank" className="hover:scale-110 transition-transform">
+          <img src={reactLogo} className="w-16 h-16" alt="React logo" />
         </a>
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+      <p className="text-center text-muted-foreground">Click on the Tauri, Vite, and React logos to learn more.</p>
 
       <form
-        className="row"
+        className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         onSubmit={(e) => {
           e.preventDefault();
           greet();
@@ -40,10 +41,11 @@ function App() {
           id="greet-input"
           onChange={(e) => setName(e.currentTarget.value)}
           placeholder="Enter a name..."
+          className="px-4 py-2 rounded-md border border-input bg-background w-full sm:w-auto"
         />
-        <button type="submit">Greet</button>
+        <Button type="submit">Greet</Button>
       </form>
-      <p>{greetMsg}</p>
+      <p className="text-center font-medium">{greetMsg}</p>
     </main>
   );
 }
