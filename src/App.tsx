@@ -1,52 +1,63 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { useState, useEffect } from "react";
 import "./App.css";
-import { Button } from "@/components/ui/button";
+import "./assets/editor.css";
+import '@mdxeditor/editor/style.css';
+import { MainLayout } from "@/components/layout/MainLayout";
+import { MainPage } from "@/pages/MainPage";
+import { SearchPage } from "@/pages/SearchPage";
+import { PromptPage } from "@/pages/PromptPage";
+
+type Page = 'main' | 'search' | 'prompt';
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [userName] = useState("DRNKNDev");
+  const [activePage, setActivePage] = useState<Page>('main');
+  
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if Command/Ctrl key is pressed
+      if (e.metaKey || e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case 'j': // Cmd/Ctrl + J for Main page
+            e.preventDefault();
+            setActivePage('main');
+            break;
+          case 'k': // Cmd/Ctrl + K for Search page
+            e.preventDefault();
+            setActivePage('search');
+            break;
+          case 'l': // Cmd/Ctrl + L for Prompt page
+            e.preventDefault();
+            setActivePage('prompt');
+            break;
+        }
+      }
+    };
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
-
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+  
+  const renderPage = () => {
+    switch (activePage) {
+      case 'main':
+        return <MainPage />;
+      case 'search':
+        return <SearchPage />;
+      case 'prompt':
+        return <PromptPage />;
+      default:
+        return <MainPage />;
+    }
+  };
+  
   return (
-    <main className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-center">Welcome to Tauri + React</h1>
-
-      <div className="flex justify-center items-center gap-6">
-        <a href="https://vitejs.dev" target="_blank" className="hover:scale-110 transition-transform">
-          <img src="/vite.svg" className="w-16 h-16" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank" className="hover:scale-110 transition-transform">
-          <img src="/tauri.svg" className="w-16 h-16" alt="Tauri logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank" className="hover:scale-110 transition-transform">
-          <img src={reactLogo} className="w-16 h-16" alt="React logo" />
-        </a>
-      </div>
-      <p className="text-center text-muted-foreground">Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-          className="px-4 py-2 rounded-md border border-input bg-background w-full sm:w-auto"
-        />
-        <Button type="submit">Greet</Button>
-      </form>
-      <p className="text-center font-medium">{greetMsg}</p>
-    </main>
+    <MainLayout userName={userName}>
+      {renderPage()}
+    </MainLayout>
   );
 }
 
