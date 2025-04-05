@@ -1,0 +1,28 @@
+/* MDXEditor overrides using role attributes for more reliable targeting */
+.mdxeditor {
+  padding: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Target the content editable area using role attribute */
+[role="textbox"] {
+  padding: 0 !important;
+  height: 100% !important;
+  overflow: visible !important; /* Let ScrollArea handle the scrolling */
+}
+
+/* Target the root contenteditable */
+.mdxeditor-root-contenteditable {
+  padding: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Additional selectors to ensure no padding */
+.mdxeditor > div {
+  padding: 0 !important;
+  height: 100% !important;
+}
