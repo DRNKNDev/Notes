@@ -1,43 +1,65 @@
-import { ReactNode } from "react"
+import { AppSidebar } from "@/components/app-sidebar"
+import { useState } from "react"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+
 
 interface MainLayoutProps {
-  children: ReactNode
-  userName: string
+  children: React.ReactNode
 }
 
-export function MainLayout({ children, userName }: MainLayoutProps) {
+export default function MainLayout({ children }: MainLayoutProps) {
+  // State to track if Journal is active (will be updated by AppSidebar)
+  const [isJournalActive, setIsJournalActive] = useState(false)
+
   return (
-    <div className="fixed inset-0 p-8 flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <p className="text-muted-foreground/70 text-xs">
-            Hi{" "}
-            <a
-              href="#"
-              className="text-muted-foreground/70 hover:text-muted-foreground transition-colors"
-            >
-              {userName}
-            </a>
-            ,
-          </p>
-          <p className="text-muted-foreground/70 text-xs">
-            You have{" "}
-            <a
-              href="#"
-              className="text-muted-foreground/70 hover:text-muted-foreground transition-colors"
-            >
-              13 ongoing tasks
-            </a>
-          </p>
+    <SidebarProvider
+      style={
+        {
+          // Use a narrower sidebar width when Journal is active (no secondary sidebar)
+          "--sidebar-width": isJournalActive ? "48px" : "350px",
+          // Add top margin to account for the header bar
+          "--sidebar-top": "28px",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar onJournalActive={setIsJournalActive} />
+      <SidebarInset className="flex flex-col">
+        <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b bg-background p-2 z-10">
+          {!isJournalActive && (
+            <>
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+            </>
+          )}
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block text-xs">
+                <BreadcrumbLink href="#">All Notes</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs">{isJournalActive ? "Today's Journal" : "Notes"}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+        <div className="flex-1 overflow-auto rounded-br-lg">
+          {children}
         </div>
-        <a
-          href="#"
-          className="text-muted-foreground/70 hover:text-muted-foreground transition-colors text-sm"
-        >
-          April 4, 2025
-        </a>
-      </div>
-      <div className="flex-grow overflow-hidden">{children}</div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
