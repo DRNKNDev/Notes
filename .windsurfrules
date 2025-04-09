@@ -1,0 +1,2 @@
+- Use Tailwind v4 CSS for styling
+- Use Shadcn UI components, install them using `pnpm dlx shadcn@latest add <component-name>` if not available in `src/components/uiui`
