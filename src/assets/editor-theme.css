@@ -12,7 +12,7 @@
   --baseSolid: var(--secondary);
   --baseSolidHover: var(--muted);
   --baseText: var(--foreground);
-  --baseTextContrast: var(--primary);
+  --baseTextContrast: var(--foreground);
 
   /* Accent colors */
   --accentBase: var(--primary);
