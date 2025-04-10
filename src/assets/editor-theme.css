@@ -1,0 +1,77 @@
+/* MDXEditor dark theme support */
+.mdx-dark-theme {
+  /* Base colors */
+  --baseBase: var(--background);
+  --baseBgSubtle: var(--card);
+  --baseBg: var(--secondary);
+  --baseBgHover: var(--muted);
+  --baseBgActive: var(--muted-foreground);
+  --baseLine: var(--border);
+  --baseBorder: var(--border);
+  --baseBorderHover: var(--ring);
+  --baseSolid: var(--secondary);
+  --baseSolidHover: var(--muted);
+  --baseText: var(--foreground);
+  --baseTextContrast: var(--primary);
+
+  /* Accent colors */
+  --accentBase: var(--primary);
+  --accentBgSubtle: var(--primary-foreground);
+  --accentBg: var(--primary);
+  --accentBgHover: var(--primary-foreground);
+  --accentBgActive: var(--primary);
+  --accentLine: var(--primary);
+  --accentBorder: var(--primary);
+  --accentBorderHover: var(--primary-foreground);
+  --accentSolid: var(--primary);
+  --accentSolidHover: var(--primary-foreground);
+  --accentText: var(--primary);
+  --accentTextContrast: var(--primary-foreground);
+
+  /* Admonition colors */
+  --admonitionTipBg: var(--accent);
+  --admonitionTipBorder: var(--accent-foreground);
+  
+  --admonitionInfoBg: var(--accent);
+  --admonitionInfoBorder: var(--accent-foreground);
+
+  --admonitionCautionBg: var(--destructive);
+  --admonitionCautionBorder: var(--destructive-foreground);
+
+  --admonitionDangerBg: var(--destructive);
+  --admonitionDangerBorder: var(--destructive-foreground);
+
+  --admonitionNoteBg: var(--muted);
+  --admonitionNoteBorder: var(--muted-foreground);
+
+  /* Font settings */
+  font-family: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Text color */
+  color: var(--foreground);
+  
+  /* Background */
+  --basePageBg: var(--background);
+  background: var(--basePageBg);
+}
+
+/* Ensure code blocks have proper contrast in dark mode */
+.mdx-dark-theme [data-lexical-editor] pre {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+}
+
+/* Improve toolbar contrast in dark mode */
+.mdx-dark-theme [role="toolbar"] {
+  background-color: var(--card);
+  border-color: var(--border);
+}
+
+/* Improve dropdown menus in dark mode */
+.mdx-dark-theme [role="menu"],
+.mdx-dark-theme [role="dialog"] {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+}
