@@ -160,30 +160,6 @@
     font-size: 0.875rem; /* Equivalent to text-sm */
   }
 
-  /* Custom scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-border rounded-full;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/30;
-  }
-
-  /* Firefox scrollbar styling */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-
   /* Reduce all Tailwind font sizes by one step */
   .text-base {
     font-size: 0.875rem; /* text-sm */
