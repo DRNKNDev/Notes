@@ -29,18 +29,24 @@ const data = {
       url: "#",
       icon: Sparkles,
       isActive: false,
+      shortcut: "⌘/",
+      shortcutKeys: ["meta", "/"],
     },
     {
       title: "Journal",
       url: "#",
       icon: PenLine,
       isActive: false,
+      shortcut: "⌘J",
+      shortcutKeys: ["meta", "j"],
     },
     {
       title: "Notes",
       url: "#",
       icon: BookText,
       isActive: true,
+      shortcut: "⌘B",
+      shortcutKeys: ["meta", "b"],
     },
   ],
   notes: [
@@ -107,23 +113,64 @@ const data = {
   ],
 }
 
+import { ActiveItem } from "@/components/layout/MainLayout"
+
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  onJournalActive?: (isActive: boolean) => void
+  onActiveItemChange?: (item: ActiveItem) => void
 }
 
-export function AppSidebar({ onJournalActive, ...props }: AppSidebarProps) {
-  // Note: I'm using state to show active item.
-  // IRL you should use the url/router.
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
-
-  // Notify parent component when Journal is active
-  React.useEffect(() => {
-    if (onJournalActive) {
-      onJournalActive(activeItem?.title === "Journal")
-    }
-  }, [activeItem, onJournalActive])
+export function AppSidebar({ onActiveItemChange, ...props }: AppSidebarProps) {
+  const [activeItem, setActiveItem] = React.useState(data.navMain[2])
   const [notes, setNotes] = React.useState(data.notes)
   const { setOpen } = useSidebar()
+
+  // Handle keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if meta key (Command on Mac, Ctrl on Windows) is pressed
+      if (event.metaKey) {
+        // Find the matching shortcut
+        const navItem = data.navMain.find(item => {
+          return item.shortcutKeys[0] === 'meta' && 
+                 event.key.toLowerCase() === item.shortcutKeys[1];
+        });
+        
+        if (navItem) {
+          event.preventDefault();
+          setActiveItem(navItem);
+          
+          // If switching to Notes, load notes data
+          if (navItem.title === 'Notes') {
+            const note = data.notes.sort(() => Math.random() - 0.5);
+            setNotes(
+              note.slice(
+                0,
+                Math.max(5, Math.floor(Math.random() * 10) + 1),
+              ),
+            );
+          }
+          
+          setOpen(true);
+        }
+      }
+    };
+    
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Notify parent component when active item changes
+  React.useEffect(() => {
+    if (onActiveItemChange && activeItem) {
+      onActiveItemChange(activeItem)
+    }
+  }, [activeItem, onActiveItemChange])
+  // Already using setOpen from useSidebar above
 
   return (
     <Sidebar
@@ -163,15 +210,20 @@ export function AppSidebar({ onJournalActive, ...props }: AppSidebarProps) {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       tooltip={{
-                        children: item.title,
+                        children: (
+                          <div className="flex items-center gap-2">
+                            <span>{item.title}</span>
+                            {item.shortcut && (
+                              <kbd className="text-xs px-1.5 py-0.5 rounded">
+                                {item.shortcut}
+                              </kbd>
+                            )}
+                          </div>
+                        ),
                         hidden: false,
                       }}
                       onClick={() => {
                         setActiveItem(item)
-                        // Notify parent about Journal state change
-                        if (onJournalActive) {
-                          onJournalActive(item.title === "Journal")
-                        }
 
                         const note = data.notes.sort(() => Math.random() - 0.5)
                         setNotes(
@@ -186,7 +238,14 @@ export function AppSidebar({ onJournalActive, ...props }: AppSidebarProps) {
                       className="px-2.5 md:px-2 my-2 rounded-md"
                     >
                       <item.icon className="size-5" />
-                      <span>{item.title}</span>
+                      <div className="flex flex-1 items-center justify-between">
+                        <span>{item.title}</span>
+                        {item.shortcut && (
+                          <kbd className="ml-auto text-xs text-muted-foreground hidden md:inline-flex">
+                            {item.shortcut}
+                          </kbd>
+                        )}
+                      </div>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -201,8 +260,8 @@ export function AppSidebar({ onJournalActive, ...props }: AppSidebarProps) {
 
       {/* This is the second sidebar */}
       {/* We disable collapsible and let it fill remaining space */}
-      {/* Hide the secondary sidebar when Journal is active */}
-      {activeItem?.title !== "Journal" && (
+      {/* Hide the secondary sidebar when Journal or Prompt is active */}
+      {activeItem?.title !== "Journal" && activeItem?.title !== "Prompt" && (
         <Sidebar collapsible="none" className="hidden flex-1 md:flex">
           <SidebarHeader className="gap-3.5 border-b p-4">
             <div className="flex w-full items-center justify-between">
