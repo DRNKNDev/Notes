@@ -51,9 +51,10 @@ export function PromptPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <ChatContainer className="flex-1 p-4">
-        <div className="space-y-4 mb-4">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ChatContainer className="h-full p-4">
+          <div className="space-y-4 mb-4">
           {messages.map((message, index) => (
             <Message
               key={index}
@@ -88,8 +89,9 @@ export function PromptPage() {
               </div>
             </Message>
           )}
-        </div>
-      </ChatContainer>
+          </div>
+        </ChatContainer>
+      </div>
 
       <div className="h-42 p-4">
         <PromptInput 

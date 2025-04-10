@@ -82,7 +82,7 @@ export default function MainLayout({ children, onActiveItemChange }: MainLayoutP
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <div className="flex-1 overflow-auto rounded-br-lg">
+        <div className="flex-1 overflow-hidden rounded-br-lg">
           {children}
         </div>
       </SidebarInset>
