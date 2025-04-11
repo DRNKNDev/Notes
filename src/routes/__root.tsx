@@ -1,9 +1,7 @@
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { WindowControls } from "@/components/ui/window-controls";
-
-// This will be created in Phase 2
-// import { RootLayout } from "@/components/layout/RootLayout";
+import { RootLayout } from "@/components/layout/root-layout";
 
 export const Route = createRootRoute({
   component: () => (
@@ -17,15 +15,10 @@ export const Route = createRootRoute({
         <div className="text-xs font-semibold px-2 select-none">DRNKN Notes</div>
       </div>
       
-      {/* 
-        In Phase 2, we'll replace this with:
-        <RootLayout>
-          <Outlet />
-        </RootLayout>
-      */}
-      <div className="flex-1 overflow-hidden">
+      {/* Use the new RootLayout component */}
+      <RootLayout>
         <Outlet />
-      </div>
+      </RootLayout>
       
       {/* Show devtools in development */}
       {import.meta.env.DEV && <TanStackRouterDevtools />}
