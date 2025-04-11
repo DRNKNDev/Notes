@@ -19,11 +19,13 @@ export function NoteEditor({
     <div className="flex flex-col w-full">
       <div className="mb-4">
         <FrontMatterEditor
+          key={frontMatter.title} // Use title as key to force re-render when frontMatter changes
           frontMatter={frontMatter}
           onChange={onFrontMatterChange}
         />
       </div>
       <MDXEditor
+      key={markdown.substring(0, 40)} // Use part of the content as key to force re-render when content changes
       markdown={markdown}
       plugins={
         [

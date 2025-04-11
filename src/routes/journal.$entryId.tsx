@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { NoteEditor } from "@/components/editor/note-editor";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FrontMatterData } from "@/components/editor/frontmatter-editor";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -57,6 +57,15 @@ function JournalEntryView() {
     tags: [],
     date: entry.date
   });
+  
+  // Reset frontMatter when entryId changes
+  useEffect(() => {
+    setFrontMatter({
+      title: entry.title,
+      tags: [],
+      date: entry.date
+    });
+  }, [entryId, entry.title, entry.date]);
 
   const handleFrontMatterChange = (data: FrontMatterData) => {
     setFrontMatter(data);
@@ -67,6 +76,7 @@ function JournalEntryView() {
       <ScrollArea className="flex-1 h-full w-full">
         <div className="p-6 pb-20 min-h-full">
           <NoteEditor 
+            key={entryId} // Use entryId as key to force complete re-render when switching entries
             frontMatter={frontMatter}
             markdown={entry.content}
             onFrontMatterChange={handleFrontMatterChange}
