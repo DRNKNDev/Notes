@@ -6,12 +6,16 @@ import {
 import { AppHeader } from "./app-header.tsx";
 import { AppSidebar } from "./app-sidebar.tsx";
 import { useMatches } from "@tanstack/react-router";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
 export function RootLayout({ children }: RootLayoutProps) {
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
+  
   const matches = useMatches();
   const routePath = matches.length > 0 ? matches[matches.length - 1].pathname : "/";
   const hideSecondarySidebar = routePath === "/prompt";
