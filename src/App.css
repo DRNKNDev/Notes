@@ -159,21 +159,4 @@
     @apply bg-transparent text-foreground;
     font-size: 0.875rem; /* Equivalent to text-sm */
   }
-
-  /* Reduce all Tailwind font sizes by one step */
-  .text-base {
-    font-size: 0.875rem; /* text-sm */
-  }
-  .text-sm {
-    font-size: 0.75rem; /* text-xs */
-  }
-  .text-lg {
-    font-size: 1rem; /* text-base */
-  }
-  .text-xl {
-    font-size: 1.125rem; /* text-lg */
-  }
-  .text-2xl {
-    font-size: 1.25rem; /* text-xl */
-  }
 }
