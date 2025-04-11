@@ -5,8 +5,10 @@ import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
+  Moon,
   Settings,
   Sparkles,
+  Sun,
 } from "lucide-react"
 
 import {
@@ -29,6 +31,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useThemeContext } from "./theme-provider"
 
 export function NavUser({
   user,
@@ -40,10 +43,36 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { theme, setTheme, effectiveTheme } = useThemeContext()
+
+  const handleThemeChange = () => {
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('system');
+    } else {
+      setTheme('light');
+    }
+  };
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
+      <SidebarMenuItem className="my-2">
+        <SidebarMenuButton onClick={handleThemeChange} className="justify-start w-full">
+          {effectiveTheme === 'dark' ? (
+            <Moon className="size-4 mr-2" />
+          ) : (
+            <Sun className="size-4 mr-2" />
+          )}
+          <span className="text-sm font-medium">
+            {theme === 'light' && "Light Theme"}
+            {theme === 'dark' && "Dark Theme"}
+            {theme === 'system' && "System Theme"}
+          </span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem className="my-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
