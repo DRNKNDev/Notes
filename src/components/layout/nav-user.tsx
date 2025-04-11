@@ -31,7 +31,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useThemeContext } from "./theme-provider"
+import { useThemeContext } from "../theme-provider"
 
 export function NavUser({
   user,
