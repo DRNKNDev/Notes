@@ -15,6 +15,8 @@ import { Route as PromptImport } from './routes/prompt'
 import { Route as NotesImport } from './routes/notes'
 import { Route as JournalImport } from './routes/journal'
 import { Route as IndexImport } from './routes/index'
+import { Route as NotesNoteIdImport } from './routes/notes.$noteId'
+import { Route as JournalEntryIdImport } from './routes/journal.$entryId'
 
 // Create/Update Routes
 
@@ -40,6 +42,18 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const NotesNoteIdRoute = NotesNoteIdImport.update({
+  id: '/$noteId',
+  path: '/$noteId',
+  getParentRoute: () => NotesRoute,
+} as any)
+
+const JournalEntryIdRoute = JournalEntryIdImport.update({
+  id: '/$entryId',
+  path: '/$entryId',
+  getParentRoute: () => JournalRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -74,53 +88,113 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PromptImport
       parentRoute: typeof rootRoute
     }
+    '/journal/$entryId': {
+      id: '/journal/$entryId'
+      path: '/$entryId'
+      fullPath: '/journal/$entryId'
+      preLoaderRoute: typeof JournalEntryIdImport
+      parentRoute: typeof JournalImport
+    }
+    '/notes/$noteId': {
+      id: '/notes/$noteId'
+      path: '/$noteId'
+      fullPath: '/notes/$noteId'
+      preLoaderRoute: typeof NotesNoteIdImport
+      parentRoute: typeof NotesImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface JournalRouteChildren {
+  JournalEntryIdRoute: typeof JournalEntryIdRoute
+}
+
+const JournalRouteChildren: JournalRouteChildren = {
+  JournalEntryIdRoute: JournalEntryIdRoute,
+}
+
+const JournalRouteWithChildren =
+  JournalRoute._addFileChildren(JournalRouteChildren)
+
+interface NotesRouteChildren {
+  NotesNoteIdRoute: typeof NotesNoteIdRoute
+}
+
+const NotesRouteChildren: NotesRouteChildren = {
+  NotesNoteIdRoute: NotesNoteIdRoute,
+}
+
+const NotesRouteWithChildren = NotesRoute._addFileChildren(NotesRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/journal': typeof JournalRoute
-  '/notes': typeof NotesRoute
+  '/journal': typeof JournalRouteWithChildren
+  '/notes': typeof NotesRouteWithChildren
   '/prompt': typeof PromptRoute
+  '/journal/$entryId': typeof JournalEntryIdRoute
+  '/notes/$noteId': typeof NotesNoteIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/journal': typeof JournalRoute
-  '/notes': typeof NotesRoute
+  '/journal': typeof JournalRouteWithChildren
+  '/notes': typeof NotesRouteWithChildren
   '/prompt': typeof PromptRoute
+  '/journal/$entryId': typeof JournalEntryIdRoute
+  '/notes/$noteId': typeof NotesNoteIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/journal': typeof JournalRoute
-  '/notes': typeof NotesRoute
+  '/journal': typeof JournalRouteWithChildren
+  '/notes': typeof NotesRouteWithChildren
   '/prompt': typeof PromptRoute
+  '/journal/$entryId': typeof JournalEntryIdRoute
+  '/notes/$noteId': typeof NotesNoteIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/journal' | '/notes' | '/prompt'
+  fullPaths:
+    | '/'
+    | '/journal'
+    | '/notes'
+    | '/prompt'
+    | '/journal/$entryId'
+    | '/notes/$noteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/journal' | '/notes' | '/prompt'
-  id: '__root__' | '/' | '/journal' | '/notes' | '/prompt'
+  to:
+    | '/'
+    | '/journal'
+    | '/notes'
+    | '/prompt'
+    | '/journal/$entryId'
+    | '/notes/$noteId'
+  id:
+    | '__root__'
+    | '/'
+    | '/journal'
+    | '/notes'
+    | '/prompt'
+    | '/journal/$entryId'
+    | '/notes/$noteId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  JournalRoute: typeof JournalRoute
-  NotesRoute: typeof NotesRoute
+  JournalRoute: typeof JournalRouteWithChildren
+  NotesRoute: typeof NotesRouteWithChildren
   PromptRoute: typeof PromptRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  JournalRoute: JournalRoute,
-  NotesRoute: NotesRoute,
+  JournalRoute: JournalRouteWithChildren,
+  NotesRoute: NotesRouteWithChildren,
   PromptRoute: PromptRoute,
 }
 
@@ -144,13 +218,27 @@ export const routeTree = rootRoute
       "filePath": "index.tsx"
     },
     "/journal": {
-      "filePath": "journal.tsx"
+      "filePath": "journal.tsx",
+      "children": [
+        "/journal/$entryId"
+      ]
     },
     "/notes": {
-      "filePath": "notes.tsx"
+      "filePath": "notes.tsx",
+      "children": [
+        "/notes/$noteId"
+      ]
     },
     "/prompt": {
       "filePath": "prompt.tsx"
+    },
+    "/journal/$entryId": {
+      "filePath": "journal.$entryId.tsx",
+      "parent": "/journal"
+    },
+    "/notes/$noteId": {
+      "filePath": "notes.$noteId.tsx",
+      "parent": "/notes"
     }
   }
 }
