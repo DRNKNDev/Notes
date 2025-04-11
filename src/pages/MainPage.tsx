@@ -2,6 +2,7 @@ import { useState } from "react"
 import { NoteEditor } from "@/components/editor/NoteEditor"
 import { FrontMatterData } from "@/components/editor/FrontMatterEditor"
 import { format } from "date-fns"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function MainPage() {
   const [frontMatter, setFrontMatter] = useState<FrontMatterData>({
@@ -70,10 +71,12 @@ If you have any questions or need assistance, click the help icon in the top rig
 Happy note-taking!`
 
   return (
-    <NoteEditor
-      frontMatter={frontMatter}
-      markdown={markdown}
-      onFrontMatterChange={setFrontMatter}
-    />
+    <ScrollArea className="h-full">
+      <NoteEditor
+        frontMatter={frontMatter}
+        markdown={markdown}
+        onFrontMatterChange={setFrontMatter}
+      />
+    </ScrollArea>
   )
 }

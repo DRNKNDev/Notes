@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 // This is sample data
 const data = {
@@ -272,27 +273,29 @@ export function AppSidebar({ onActiveItemChange, ...props }: AppSidebarProps) {
             <SidebarInput placeholder="Search..." />
           </SidebarHeader>
           <SidebarContent>
-            <SidebarGroup className="px-0">
-              <SidebarGroupContent className="space-y-1 px-2 py-1">
-                {notes.map((note) => (
-                  <a
-                    href="#"
-                    key={note.title}
-                    className="block rounded-md hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium truncate">{note.title}</span>
-                        <span className="text-xs text-muted-foreground">{note.date}</span>
+            <ScrollArea className="h-full">
+              <SidebarGroup className="px-0">
+                <SidebarGroupContent className="space-y-1 px-2 py-1">
+                  {notes.map((note) => (
+                    <a
+                      href="#"
+                      key={note.title}
+                      className="block rounded-md hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium truncate">{note.title}</span>
+                          <span className="text-xs text-muted-foreground">{note.date}</span>
+                        </div>
+                        <p className="line-clamp-2 text-xs text-muted-foreground">
+                          {note.content}
+                        </p>
                       </div>
-                      <p className="line-clamp-2 text-xs text-muted-foreground">
-                        {note.content}
-                      </p>
-                    </div>
-                  </a>
-                ))}
-              </SidebarGroupContent>
-            </SidebarGroup>
+                    </a>
+                  ))}
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </ScrollArea>
           </SidebarContent>
         </Sidebar>
       )}

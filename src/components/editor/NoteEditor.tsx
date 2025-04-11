@@ -17,7 +17,7 @@ export function NoteEditor({
   const { effectiveTheme } = useThemeContext(); // Get current theme
   const isDarkMode = effectiveTheme === 'dark';
   return (
-    <div className="flex flex-col h-full p-4">
+    <div className="flex flex-col h-full p-4 pb-20">
       <div className="mb-4">
         <FrontMatterEditor
           frontMatter={frontMatter}

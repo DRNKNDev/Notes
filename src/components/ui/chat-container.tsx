@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { Children, useCallback, useEffect, useRef, useState } from "react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const useAutoScroll = (
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -162,7 +163,8 @@ function ChatContainer({
   const containerRef = useRef<HTMLDivElement>(null)
   const localBottomRef = useRef<HTMLDivElement>(null)
   const bottomRef = scrollToRef || localBottomRef
-  const chatContainerRef = ref || containerRef
+  // Ensure we have a properly typed ref that can be passed to a div element
+  const chatContainerRef = (ref || containerRef) as React.RefObject<HTMLDivElement>
   const prevChildrenRef = useRef<React.ReactNode>(null)
   const contentChangedWithoutNewMessageRef = useRef(false)
 
@@ -222,19 +224,21 @@ function ChatContainer({
   ])
 
   return (
-    <div
-      className={cn("flex flex-col overflow-y-auto", className)}
-      role="log"
-      ref={chatContainerRef}
-      {...props}
-    >
-      {children}
-      <div
-        ref={bottomRef}
-        className="h-[1px] w-full flex-shrink-0 scroll-mt-4"
-        aria-hidden="true"
-      />
-    </div>
+    <ScrollArea className={cn("flex-1 min-h-0", className)}>
+      <div 
+        className="flex flex-col w-full"
+        role="log"
+        ref={chatContainerRef}
+        {...props}
+      >
+        {children}
+        <div
+          ref={bottomRef}
+          className="h-[1px] w-full flex-shrink-0 scroll-mt-4"
+          aria-hidden="true"
+        />
+      </div>
+    </ScrollArea>
   )
 }
 
