@@ -5,18 +5,23 @@ import {
 } from "@/components/ui/sidebar";
 import { AppHeader } from "./app-header.tsx";
 import { AppSidebar } from "./app-sidebar.tsx";
+import { useMatches } from "@tanstack/react-router";
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
 export function RootLayout({ children }: RootLayoutProps) {
+  const matches = useMatches();
+  const routePath = matches.length > 0 ? matches[matches.length - 1].pathname : "/";
+  const hideSecondarySidebar = routePath === "/prompt";
+
   return (
     <SidebarProvider
       style={
         {
-          // Default sidebar width (can be overridden by route-specific settings)
-          "--sidebar-width": "350px",
+          // Dynamically adjust sidebar width based on the current route
+          "--sidebar-width": hideSecondarySidebar ? "48px" : "350px",
           // Add top margin to account for the header bar
           "--sidebar-top": "28px",
         } as React.CSSProperties
