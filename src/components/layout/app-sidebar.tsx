@@ -1,4 +1,3 @@
-// No React imports needed
 import { BookText, Command, PenLine, Sparkles } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
 
@@ -191,7 +190,21 @@ export function AppSidebar() {
               <SidebarMenu className="space-y-4">
                 {data.navMain.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
+                    <SidebarMenuButton 
+                      size="lg" 
+                      asChild 
+                      className="md:h-8 md:p-0" 
+                      tooltip={{
+                        children: (
+                          <div className="flex items-center justify-between">
+                            <div>{item.title}</div>
+                            {item.shortcut && (
+                              <div className="text-xs text-muted-foreground ml-2">{item.shortcut}</div>
+                            )}
+                          </div>
+                        )
+                      }}
+                    >
                       <Link
                         to={item.url}
                         activeProps={{
