@@ -1,32 +1,23 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { format } from "date-fns";
 
-// This route serves as a layout for the nested journal routes
-// The sidebar is now handled by AppSidebar component
+// This route creates a new journal entry with the current date
+// and redirects to it automatically
 export const Route = createFileRoute('/journal')({  
-  component: JournalLayout
+  component: JournalRedirect
 });
 
-function JournalLayout() {
-  // Get current route state to check parameters
-  const routerState = useRouterState();
-  const currentRoute = routerState.matches[routerState.matches.length - 1];
+function JournalRedirect() {
+  // Generate today's date in a readable format
+  const today = new Date();
+  const formattedDate = format(today, "yyyy-MM-dd");
   
-  // Safely check if we're on a journal entry detail route and extract the entryId
-  const isEntryDetailRoute = currentRoute?.routeId.includes('$entryId');
-  const entryId = isEntryDetailRoute && 'entryId' in currentRoute.params 
-    ? String(currentRoute.params.entryId) 
-    : undefined;
-  const hasEntryId = !!entryId;
-
+  // Create a unique ID for today's journal entry
+  // Using the date as the ID ensures we get the same entry for the same day
+  const journalEntryId = formattedDate;
+  
   return (
-    <div className="flex-1 h-full overflow-hidden">
-      {hasEntryId ? (
-        <Outlet />
-      ) : (
-        <div className="flex items-center justify-center h-full text-muted-foreground">
-          Select a journal entry to view
-        </div>
-      )}
-    </div>
+    // Redirect to today's journal entry
+    <Navigate to="/journal/$entryId" params={{ entryId: journalEntryId }} />
   );
 }
