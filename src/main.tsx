@@ -1,8 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./App.css";
-import "./assets/editor.css";
-import '@mdxeditor/editor/style.css';
+import "./assets/global.css";
 import { ThemeProvider } from "./components/theme-provider";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 

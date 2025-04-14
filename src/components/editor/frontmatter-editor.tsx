@@ -18,6 +18,11 @@ export function FrontMatterEditor({
 }: FrontMatterEditorProps) {
   const [title, setTitle] = useState(frontMatter.title || "")
   const [isTitleEditing, setIsTitleEditing] = useState(false)
+  
+  // Update internal state when props change
+  useEffect(() => {
+    setTitle(frontMatter.title || "")
+  }, [frontMatter.title])
 
   const titleRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
