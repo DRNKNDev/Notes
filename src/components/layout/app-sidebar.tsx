@@ -27,13 +27,13 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    {
-      title: "Prompt",
-      url: "/prompt",
-      icon: Sparkles,
-      shortcut: "⌘/",
-      shortcutKeys: ["meta", "/"],
-    },
+    // {
+    //   title: "Prompt",
+    //   url: "/prompt",
+    //   icon: Sparkles,
+    //   shortcut: "⌘/",
+    //   shortcutKeys: ["meta", "/"],
+    // },
     {
       title: "Journal",
       url: "/journal",
