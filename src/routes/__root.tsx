@@ -8,7 +8,7 @@ export const Route = createRootRoute({
     <div className="flex flex-col h-screen overflow-hidden rounded-lg">
       {/* Tauri window controls header */}
       <div 
-        className="h-[28px] bg-sidebar text-sidebar-foreground w-full flex items-center justify-between border-b rounded-t-lg"
+        className="h-[28px] bg-sidebar text-sidebar-foreground w-full flex items-center justify-between border-b border-muted rounded-t-lg"
         data-tauri-drag-region
       >
         <WindowControls className="ml-1" />

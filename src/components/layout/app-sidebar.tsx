@@ -165,7 +165,7 @@ export function AppSidebar() {
       {/* This will make the sidebar appear as icons. */}
       <Sidebar
         collapsible="none"
-        className="w-[calc(var(--sidebar-width-icon)+1px)]! border-r"
+        className="w-[calc(var(--sidebar-width-icon)+1px)]! border-r border-muted"
       >
         <SidebarHeader>
           <SidebarMenu>
@@ -242,9 +242,9 @@ export function AppSidebar() {
       {!isPromptRoute && !isJournalRoute && (
         <Sidebar
           collapsible="none"
-          className="flex-1 border-r"
+          className="flex-1 border-r border-muted"
         >
-          <SidebarHeader className="gap-3.5 border-b p-4">
+          <SidebarHeader className="gap-3.5 border-b border-muted p-4">
             <div className="flex w-full items-center justify-between">
               <div className="text-foreground text-base font-medium">
                 {isNotesRoute ? "Notes" : "Journal"}
