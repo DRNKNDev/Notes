@@ -13,69 +13,55 @@ function NoteView() {
   const { noteId } = Route.useParams();
   
   // Sample data for notes (this would typically come from a data store)
-  const markdownContent = `DRNKN Notes is a simple, elegant note-taking app designed for developers and technical users. This guide will help you get started with the basic features.
+  const markdownContent = `This is a quick guide to help you get started with the core features.
 
-## Markdown Features
+## Basic Formatting (Markdown)
 
-DRNKN Notes supports all standard Markdown syntax, plus some additional features:
+DRNKN Notes uses Markdown for formatting. Here are the essentials:
 
-### Headings
+- **Headings:** Use \`#\` symbols (e.g., \`## Subheading\`). More \`#\` means smaller text.
+- **Emphasis:** \`*Italic*\` or \`_Italic_\`, \`**Bold**\` or \`__Bold__\`.
+- **Lists:**
+    - Start lines with \`-\`, \`*\`, or \`+\` for bullets.
+    - Use numbers like \`1.\` for ordered lists.
+- **Links:** \`[Link Text](https://example.com)\`
+- **Images:** \`![Alt Text](image-url.jpg)\`
+- **Code:** Use backticks for inline \`code()\`, or triple backticks for blocks:
+  \`\`\`javascript
+  console.log('Hello, Notes!');
+  \`\`\`
+- **Blockquotes:** Start lines with \`>\` to quote text.
 
-Use # symbols for headings. More # symbols means a smaller heading.
+## Todo Lists with Checkboxes
 
-### Lists
+Create interactive todo lists using square brackets:
 
-- Create bullet lists with hyphens or asterisks
-- Nested lists work too
-  - Just indent with two spaces
-  - Easy to organize information
+- [ ] Plan weekly meeting agenda
+- [x] Review project requirements
+- [ ] Update documentation
+- [x] Send progress report to team
+- [ ] Schedule follow-up with design team
 
-1. Numbered lists are also supported
-2. Just start with a number and a period
+## Organizing Your Notes
 
-### Code Blocks
+- Use folders (coming soon!) to group related notes.
+- Use descriptive titles for easy searching.
+- Leverage headings within notes to structure longer content.
 
-Create code blocks with syntax highlighting by using triple backticks and specifying the language:
+## Tips for Effective Note-Taking
 
-### Links and Images
+1. **Keep it concise:** Focus on the key information.
+2. **Use formatting:** Make your notes scannable and easy to read.
+3. **Review regularly:** Revisit your notes to reinforce information.
 
-- **Links**: Select text and click the link button, or type \`[text](url)\`
-- **Images**: Use the image button or type \`![alt text](image-url)\`
+---
 
-### Blockquotes
-
-> Use blockquotes to highlight important information or quotes.
-> 
-> Start lines with '>' or use the quote button in the toolbar.
-
-## Keyboard Shortcuts
-
-| Action | Shortcut |
-|--------|----------|
-| Bold | Ctrl/⌘ + B |
-| Italic | Ctrl/⌘ + I |
-| Link | Ctrl/⌘ + K |
-| Save | Ctrl/⌘ + S |
-| Heading | Ctrl/⌘ + Alt + [1-6] |
-
-## Tips for Productivity
-
-1. **Use keyboard shortcuts** for faster editing
-2. **Organize with headings** to create a clear structure
-3. **Preview your notes** to see how they'll look when shared
-4. **Use code blocks** for technical content with syntax highlighting
-5. **Add images** to make your notes more visual and engaging
-
-## Need Help?
-
-If you have any questions or need assistance, click the help icon in the top right corner or visit our documentation at [docs.drnkn.io](https://docs.drnkn.io).
-
-Happy note-taking!`;
+Happy note-taking! Explore the interface and experiment with the features.`;
 
   const notes = [
     {
       id: "1",
-      title: "Meeting Tomorrow",
+      title: "Welcome to DRNKN Notes!",
       date: "09:34 AM",
       content: markdownContent,
     },
