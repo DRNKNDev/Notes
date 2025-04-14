@@ -22,8 +22,8 @@ import { cn } from "@/lib/utils"
 // This is sample data
 const data = {
   user: {
-    name: "DRNKNDev",
-    email: "m@example.com",
+    name: "Early Access",
+    email: "Follow @DRNKNDev",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
