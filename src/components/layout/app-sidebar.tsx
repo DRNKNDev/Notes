@@ -263,7 +263,7 @@ export function AppSidebar() {
                         to="/notes/$noteId"
                         params={{ noteId: note.id || "1" }}
                         key={note.title}
-                        className={`block rounded-md hover:bg-accent/50 transition-colors ${noteId === (note.id || "1") ? 'bg-accent/50' : ''}`}
+                        className={`block rounded-md hover:bg-accent transition-colors ${noteId === (note.id || "1") ? 'bg-accent' : ''}`}
                       >
                         <div className="p-3 space-y-2">
                           <div className="flex items-center justify-between">
