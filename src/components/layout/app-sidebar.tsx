@@ -32,7 +32,7 @@ const data = {
     //   shortcutKeys: ["meta", "/"],
     // },
     {
-      title: "Journal",
+      title: "Today's Journal",
       url: "/journal",
       icon: PenLine,
       shortcut: "⌘J",

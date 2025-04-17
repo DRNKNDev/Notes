@@ -55,7 +55,7 @@ export function AppHeader() {
           { id: "4", title: "Monthly Review" },
         ];
         const entry = entries.find(e => e.id === entryId);
-        return entry ? entry.title : "Journal Entry";
+        return entry ? entry.title : "Today's Journal";
       }
       return "Journal";
     }
