@@ -1,3 +1,4 @@
+/* https://mdxeditor.dev/editor/docs/theming */
 /* MDXEditor overrides using role attributes for more reliable targeting */
 .mdxeditor {
   padding: 0 !important;
@@ -19,10 +20,4 @@
   height: 100% !important;
   display: flex !important;
   flex-direction: column !important;
-}
-
-/* Additional selectors to ensure no padding */
-.mdxeditor > div {
-  padding: 0 !important;
-  height: 100% !important;
 }
