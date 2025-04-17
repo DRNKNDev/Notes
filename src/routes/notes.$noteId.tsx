@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { FrontMatterData } from "@/components/editor/frontmatter-editor";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import markdownContent from "@/assets/sample-note.md?raw";
+import { useFullscreen } from "@/hooks/use-fullscreen";
+import { cn } from "@/lib/utils";
 // This route handles displaying a specific note by its ID
 export const Route = createFileRoute('/notes/$noteId')({  
   component: NoteView
@@ -70,11 +72,17 @@ function NoteView() {
   const handleFrontMatterChange = (data: FrontMatterData) => {
     setFrontMatter(data);
   };
+  
+  // Get fullscreen state
+  const { isFullscreen } = useFullscreen();
 
   return (
     <div className="h-full flex flex-col">
       <ScrollArea className="flex-1 h-full w-full">
-        <div className="p-6 pb-20 min-h-full">
+        <div className={cn(
+          "min-h-full pb-20",
+          isFullscreen ? "p-40" : "p-6"
+        )}>
           <NoteEditor 
             key={noteId} // Use noteId as key to force complete re-render when switching notes
             frontMatter={frontMatter}

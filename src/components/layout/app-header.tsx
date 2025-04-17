@@ -76,6 +76,11 @@ export function AppHeader() {
     return "Notes"; // Default
   };
 
+  // If in fullscreen mode, don't render the header
+  if (isFullscreen) {
+    return null;
+  }
+  
   return (
     <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b border-muted bg-background p-2 z-10">
       {!hideSecondarySidebar && (

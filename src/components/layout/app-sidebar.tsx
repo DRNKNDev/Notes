@@ -1,5 +1,6 @@
 import { BookText, Command, PenLine, Plus } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
+import { useFullscreen } from "@/hooks/use-fullscreen"
 
 import { SidebarActions } from "@/components/layout/sidebar-actions"
 import {
@@ -124,6 +125,9 @@ export function AppSidebar() {
   // We only need the setOpen function from useSidebar
   const { setOpen } = useSidebar()
   
+  // Get fullscreen state
+  const { isFullscreen } = useFullscreen()
+  
   // Get current router state to check route parameters
   const routerState = useRouterState()
   const currentRouteMatch = routerState.matches[routerState.matches.length - 1]
@@ -151,6 +155,11 @@ export function AppSidebar() {
   // Note: The activeItem state and notification to parent have been removed
   // as we now use Tanstack Router for navigation state
 
+  // If in fullscreen mode, don't render the sidebar
+  if (isFullscreen) {
+    return null;
+  }
+  
   return (
     <Sidebar
       collapsible="icon"
