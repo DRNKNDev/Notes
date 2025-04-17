@@ -131,7 +131,6 @@ export function NoteSearch({ open, onOpenChange }: NoteSearchProps) {
               className="flex flex-col items-start w-full"
             >
               <div className="flex items-center w-full">
-                <Search className="mr-2 h-4 w-4 shrink-0" />
                 <span className="font-medium">{note.title}</span>
                 <div className="ml-auto flex gap-1 shrink-0">
                   {note.tags.map(tag => (
@@ -144,7 +143,7 @@ export function NoteSearch({ open, onOpenChange }: NoteSearchProps) {
                   ))}
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 ml-6 line-clamp-1">
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                 {note.content}
               </p>
             </CommandItem>
