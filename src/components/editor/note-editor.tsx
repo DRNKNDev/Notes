@@ -1,6 +1,19 @@
-import { MDXEditor, headingsPlugin, listsPlugin, quotePlugin, thematicBreakPlugin, markdownShortcutPlugin, codeBlockPlugin, linkPlugin, imagePlugin, frontmatterPlugin, } from "@mdxeditor/editor"
+import { 
+  MDXEditor, 
+  headingsPlugin, 
+  listsPlugin, 
+  quotePlugin, 
+  thematicBreakPlugin, 
+  markdownShortcutPlugin, 
+  codeBlockPlugin, 
+  linkPlugin, 
+  imagePlugin, 
+  frontmatterPlugin,
+  codeMirrorPlugin, 
+} from "@mdxeditor/editor"
 import { FrontMatterEditor, FrontMatterData } from "./frontmatter-editor";
 import { useThemeContext } from "@/components/theme-provider";
+import { tailwindCodeMirrorExtensions } from './codemirror-theme';
 
 interface NoteEditorProps {
   frontMatter: FrontMatterData
@@ -15,6 +28,7 @@ export function NoteEditor({
 }: NoteEditorProps) {
   const { effectiveTheme } = useThemeContext(); // Get current theme
   const isDarkMode = effectiveTheme === 'dark';
+
   return (
     <div className="flex flex-col w-full">
       <div className="mb-4">
@@ -33,11 +47,37 @@ export function NoteEditor({
           listsPlugin(),
           quotePlugin(),
           thematicBreakPlugin(),
-          markdownShortcutPlugin(),
-          codeBlockPlugin({ defaultCodeBlockLanguage: "javascript" }),
+          codeBlockPlugin(), 
+          codeMirrorPlugin({ 
+            codeBlockLanguages: {
+              html: 'HTML',
+              css: 'CSS',
+              js: 'JavaScript',
+              jsx: 'JSX',
+              ts: 'TypeScript',
+              tsx: 'TSX',
+              python: 'Python',
+              java: 'Java',
+              csharp: 'C#',
+              cpp: 'C++',
+              php: 'PHP',
+              ruby: 'Ruby',
+              go: 'Go',
+              rust: 'Rust',
+              sql: 'SQL',
+              bash: 'Bash/Shell',
+              json: 'JSON',
+              yaml: 'YAML',
+              markdown: 'Markdown',
+              txt: 'text'
+            },
+            autoLoadLanguageSupport: true,
+            codeMirrorExtensions: tailwindCodeMirrorExtensions, // <-- Use imported extensions
+          }),
           linkPlugin(),
           imagePlugin(),
           frontmatterPlugin(),
+          markdownShortcutPlugin(),
         ] as any
       }
       className={`text-sm w-full ${isDarkMode ? 'mdx-dark-theme' : ''}`}
