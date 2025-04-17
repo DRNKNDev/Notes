@@ -21,3 +21,14 @@
   display: flex !important;
   flex-direction: column !important;
 }
+
+/* Add margin to CodeMirror wrapper - using a general selector that will work across versions */
+[class*="_codeMirrorWrapper_"] {
+  margin-top: 1rem !important;
+}
+
+/* Add margin to horizontal rule */
+[data-lexical-decorator="true"][data-component-name="<hr />"] {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
