@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function AppHeader() {
   const matches = useMatches();
@@ -73,7 +74,17 @@ export function AppHeader() {
     <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b border-muted bg-background p-2 z-10">
       {!hideSecondarySidebar && (
         <>
-          <SidebarTrigger />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SidebarTrigger />
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="center" sideOffset={5}>
+              <div className="flex items-center justify-between">
+                <p>Toggle Sidebar</p>
+                <div className="text-xs text-muted-foreground ml-2">⌘⇧B</div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
           <Separator orientation="vertical" className="mr-2 h-4" />
         </>
       )}
@@ -84,21 +95,6 @@ export function AppHeader() {
               <Link to="/notes">All Notes</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          
-          {/* Show section breadcrumb for nested routes */}
-          {(noteId || entryId) && (
-            <>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem className="hidden md:block text-xs">
-                <BreadcrumbLink asChild>
-                  <Link to={entryId ? "/journal" : "/notes"}>
-                    {entryId ? "Journal" : "Notes"}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </>
-          )}
-          
           <BreadcrumbSeparator className="hidden md:block" />
           <BreadcrumbItem>
             <BreadcrumbPage className="text-xs">
