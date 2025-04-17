@@ -1,7 +1,7 @@
 import { BookText, Command, PenLine, Plus } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
 
-import { NavUser } from "@/components/layout/nav-user"
+import { SidebarActions } from "@/components/layout/sidebar-actions"
 import {
   Sidebar,
   SidebarContent,
@@ -22,11 +22,6 @@ import { cn } from "@/lib/utils"
 
 // This is sample data
 const data = {
-  user: {
-    name: "Early Access",
-    email: "Follow @DRNKNDev",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     // {
     //   title: "Prompt",
@@ -233,7 +228,7 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <NavUser user={data.user} />
+          <SidebarActions />
         </SidebarFooter>
       </Sidebar>
 
