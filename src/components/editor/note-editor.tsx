@@ -7,7 +7,6 @@ import {
   markdownShortcutPlugin, 
   codeBlockPlugin, 
   linkPlugin, 
-  linkDialogPlugin, 
   frontmatterPlugin,
   codeMirrorPlugin, 
 } from "@mdxeditor/editor"
@@ -75,7 +74,6 @@ export function NoteEditor({
             codeMirrorExtensions: tailwindCodeMirrorExtensions, // <-- Use imported extensions
           }),
           linkPlugin(),
-          linkDialogPlugin(), // Add link dialog plugin to enable Cmd+K shortcut
           frontmatterPlugin(),
           markdownShortcutPlugin(),
         ] as any
