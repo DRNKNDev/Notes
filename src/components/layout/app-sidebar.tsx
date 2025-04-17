@@ -243,7 +243,7 @@ export function AppSidebar() {
       {!isPromptRoute && !isJournalRoute && (
         <Sidebar
           collapsible="none"
-          className="flex-1 border-r border-muted"
+          className="flex-1"
         >
           <SidebarHeader className="h-10 border-b border-muted p-0">
             <div className="flex w-full h-10 items-center justify-between px-2">

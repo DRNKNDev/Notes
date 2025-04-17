@@ -32,7 +32,7 @@ export function RootLayout({ children }: RootLayoutProps) {
       }
     >
       <AppSidebar />
-      <SidebarInset className="flex flex-col">
+      <SidebarInset className="flex flex-col border-l border-muted">
         <AppHeader />
         <div className="flex-1 overflow-hidden rounded-br-lg">
           {children}
