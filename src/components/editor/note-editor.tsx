@@ -30,7 +30,7 @@ export function NoteEditor({
 
   return (
     <div className="flex flex-col w-full">
-      <div className="mb-4">
+      <div className="mb-2">
         <FrontMatterEditor
           key={frontMatter.title} // Use title as key to force re-render when frontMatter changes
           frontMatter={frontMatter}
