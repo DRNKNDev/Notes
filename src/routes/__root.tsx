@@ -17,7 +17,7 @@ export const Route = createRootRoute({
           data-tauri-drag-region
         >
           <WindowControls className="ml-1" />
-          <div className="text-xs font-semibold px-2 select-none">DRNKN Notes</div>
+          <div className="text-[0.65rem] font-medium px-2 select-none">DRNKN Notes</div>
         </div>
         
         {/* Conditionally render either OnboardingLayout or RootLayout */}
