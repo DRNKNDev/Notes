@@ -1,4 +1,4 @@
-import { BookText, Command, PenLine, Sparkles } from "lucide-react"
+import { BookText, Command, PenLine, Plus } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
 
 import { NavUser } from "@/components/layout/nav-user"
@@ -9,12 +9,13 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
-  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { cn } from "@/lib/utils"
@@ -45,8 +46,8 @@ const data = {
       title: "Notes",
       url: "/notes",
       icon: BookText,
-      shortcut: "⌘B",
-      shortcutKeys: ["meta", "b"],
+      shortcut: "⌘L",
+      shortcutKeys: ["meta", "l"],
     },
   ],
   notes: [
@@ -244,13 +245,32 @@ export function AppSidebar() {
           collapsible="none"
           className="flex-1 border-r border-muted"
         >
-          <SidebarHeader className="gap-3.5 border-b border-muted p-4">
-            <div className="flex w-full items-center justify-between">
-              <div className="text-foreground text-base font-medium">
-                {isNotesRoute ? "Notes" : "Journal"}
-              </div>
+          <SidebarHeader className="h-10 border-b border-muted p-0">
+            <div className="flex w-full h-10 items-center justify-between px-2">
+              {/* Notes title on left */}
+              <span className="text-foreground font-semibold">
+                Notes
+              </span>
+              {/* New Note button on right */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7" 
+                    aria-label="New Note"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="center" sideOffset={5}>
+                  <div className="flex items-center justify-between">
+                    <p>New Note</p>
+                    <div className="text-xs text-muted-foreground ml-2">⌘N</div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <SidebarInput placeholder="Search..." />
           </SidebarHeader>
           <SidebarContent>
             <ScrollArea className="h-full">
