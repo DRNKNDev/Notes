@@ -41,11 +41,10 @@ DRNKN Notes supports various keyboard shortcuts to enhance your productivity:
     - `⌘B` (macOS) or `Ctrl+B` (Windows/Linux) for **bold**
     - `⌘I` or `Ctrl+I` for *italic*
     - `⌘U` or `Ctrl+U` for underline
-- **Links:** Select text and press `⌘K` to open the link dialog
 - **Navigation:**
-    - `⌘/` to go to Prompt
     - `⌘J` to go to Today's Journal
     - `⌘L` to go to Notes
+    - `⌘K` to go to Search
 - **View:**
     - `⌃⌘F` to toggle fullscreen mode
     - `⌘⇧B` to toggle sidebar
