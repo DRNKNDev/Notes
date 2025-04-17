@@ -128,9 +128,9 @@ export function AppHeader() {
             onClick={toggleFullscreen}
           >
             {isFullscreen ? (
-              <MinimizeIcon className="size-4 text-muted-foreground" />
+              <MinimizeIcon className="size-4" />
             ) : (
-              <Maximize2Icon className="size-4 text-muted-foreground" />
+              <Maximize2Icon className="size-4" />
             )}
             <span className="sr-only">Toggle Fullscreen</span>
           </Button>
