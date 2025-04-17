@@ -1,13 +1,22 @@
 import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useFullscreen } from './use-fullscreen';
 
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
+  const { toggleFullscreen } = useFullscreen();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check if Command (Meta) key is pressed
-      if (event.metaKey) {
+      // Check for Control+Command+F for fullscreen
+      if (event.metaKey && event.ctrlKey && (event.key === 'f' || event.key === 'F')) {
+        event.preventDefault();
+        toggleFullscreen();
+        return;
+      }
+      
+      // Check if Command (Meta) key is pressed (without Control)
+      if (event.metaKey && !event.ctrlKey) {
         switch (event.key) {
           case '/':
             // Command + / for Prompt

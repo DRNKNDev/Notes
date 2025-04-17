@@ -10,6 +10,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Maximize2Icon, MinimizeIcon } from "lucide-react";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 
 export function AppHeader() {
   const matches = useMatches();
@@ -35,6 +38,9 @@ export function AppHeader() {
   
   // Determine if we should hide the sidebar trigger based on the route
   const hideSecondarySidebar = routePath === "/prompt";
+  
+  // Use the fullscreen hook
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
   
   // Get a user-friendly title for the current route
   const getRouteTitle = () => {
@@ -103,6 +109,34 @@ export function AppHeader() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+      
+      {/* Spacer to push the fullscreen button to the right */}
+      <div className="flex-1" />
+      
+      {/* Fullscreen button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="size-7" 
+            onClick={toggleFullscreen}
+          >
+            {isFullscreen ? (
+              <MinimizeIcon className="size-4 text-muted-foreground" />
+            ) : (
+              <Maximize2Icon className="size-4 text-muted-foreground" />
+            )}
+            <span className="sr-only">Toggle Fullscreen</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="end" sideOffset={5}>
+          <div className="flex items-center justify-between">
+            <p>Toggle Fullscreen</p>
+            <div className="text-xs text-muted-foreground ml-2">⌃⌘F</div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
     </header>
   );
 }
