@@ -80,8 +80,8 @@ function NoteView() {
     <div className="h-full flex flex-col">
       <ScrollArea className="flex-1 h-full w-full">
         <div className={cn(
-          "min-h-full pb-20",
-          isFullscreen ? "p-40" : "p-6"
+          "min-h-full",
+          isFullscreen ? "p-40" : "p-6 pb-20"
         )}>
           <NoteEditor 
             key={noteId} // Use noteId as key to force complete re-render when switching notes
