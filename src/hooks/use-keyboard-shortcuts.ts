@@ -20,9 +20,9 @@ export function useKeyboardShortcuts() {
             event.preventDefault();
             navigate({ to: '/journal' });
             break;
-          case 'b':
-          case 'B':
-            // Command + B for Notes
+          case 'l':
+          case 'L':
+            // Command + L for Notes
             event.preventDefault();
             navigate({ to: '/notes' });
             break;
