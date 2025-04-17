@@ -81,7 +81,7 @@ function NoteView() {
       <ScrollArea className="flex-1 h-full w-full">
         <div className={cn(
           "min-h-full",
-          isFullscreen ? "p-40" : "p-6 pb-20"
+          isFullscreen ? "p-40 pt-20" : "p-6 pb-20"
         )}>
           <NoteEditor 
             key={noteId} // Use noteId as key to force complete re-render when switching notes
