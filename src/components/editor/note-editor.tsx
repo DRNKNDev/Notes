@@ -7,7 +7,6 @@ import {
   markdownShortcutPlugin, 
   codeBlockPlugin, 
   linkPlugin, 
-  imagePlugin, 
   frontmatterPlugin,
   codeMirrorPlugin, 
 } from "@mdxeditor/editor"
@@ -75,7 +74,6 @@ export function NoteEditor({
             codeMirrorExtensions: tailwindCodeMirrorExtensions, // <-- Use imported extensions
           }),
           linkPlugin(),
-          imagePlugin(),
           frontmatterPlugin(),
           markdownShortcutPlugin(),
         ] as any
