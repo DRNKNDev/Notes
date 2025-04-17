@@ -6,7 +6,7 @@ tags: [markdown, guide]
 
 This is a quick guide to help you get started with the core features.
 
-## Basic Formatting (Markdown)
+## Formatting (Markdown)
 
 DRNKN Notes uses Markdown for formatting. Here are the essentials:
 
@@ -15,8 +15,8 @@ DRNKN Notes uses Markdown for formatting. Here are the essentials:
 - **Lists:**
     - Start lines with `-`, `*`, or `+` for bullets.
     - Use numbers like `1.` for ordered lists.
+- **Horizontal Rule:** Use three or more hyphens, asterisks, or underscores (`---`, `***`, or `___`).
 - **Links:** `[Link Text](https://example.com)`
-- **Images:** `![Alt Text](image-url.jpg)`
 - **Code:** Use backticks for inline `code()`, or triple backticks for blocks.
     ```js
     console.log('Hello, Notes!');
@@ -25,7 +25,7 @@ DRNKN Notes uses Markdown for formatting. Here are the essentials:
 
 ## Todo Lists with Checkboxes
 
-Create interactive todo lists using square brackets:
+Create interactive todo lists using square brackets `[]`:
 
 - [ ] Plan weekly meeting agenda
 - [x] Review project requirements
@@ -33,17 +33,22 @@ Create interactive todo lists using square brackets:
 - [x] Send progress report to team
 - [ ] Schedule follow-up with design team
 
-## Organizing Your Notes
+## Keyboard Shortcuts
 
-- Use folders (coming soon!) to group related notes.
-- Use descriptive titles for easy searching.
-- Leverage headings within notes to structure longer content.
+DRNKN Notes supports various keyboard shortcuts to enhance your productivity:
 
-## Tips for Effective Note-Taking
-
-1. **Keep it concise:** Focus on the key information.
-2. **Use formatting:** Make your notes scannable and easy to read.
-3. **Review regularly:** Revisit your notes to reinforce information.
+- **Text Formatting:** 
+    - `⌘B` (macOS) or `Ctrl+B` (Windows/Linux) for **bold**
+    - `⌘I` or `Ctrl+I` for *italic*
+    - `⌘U` or `Ctrl+U` for underline
+- **Links:** Select text and press `⌘K` to open the link dialog
+- **Navigation:**
+    - `⌘/` to go to Prompt
+    - `⌘J` to go to Today's Journal
+    - `⌘L` to go to Notes
+- **View:**
+    - `⌃⌘F` to toggle fullscreen mode
+    - `⌘⇧B` to toggle sidebar
 
 ---
 
