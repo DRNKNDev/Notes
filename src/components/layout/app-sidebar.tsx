@@ -1,4 +1,4 @@
-import { BookText, Command, PenLine, Plus } from "lucide-react"
+import { BookText, Command, PenLine, Plus, Search } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
 import { useFullscreen } from "@/hooks/use-fullscreen"
 
@@ -130,6 +130,10 @@ const data = {
   ],
 }
 
+// Import the search component
+import { NoteSearch } from "@/components/search/note-search"
+import { useState } from "react"
+
 export function AppSidebar() {
   const matches = useMatches()
   // We only need the setOpen function from useSidebar
@@ -147,6 +151,9 @@ export function AppSidebar() {
   const isNotesRoute = currentPath.startsWith("/notes")
   const isJournalRoute = currentPath.startsWith("/journal")
   const isPromptRoute = currentPath.startsWith("/prompt")
+  
+  // State for search dialog
+  const [searchOpen, setSearchOpen] = useState(false)
   
   // Extract route parameters if available
   const noteId = isNotesRoute && currentRouteMatch?.routeId.includes('$noteId') && 'noteId' in currentRouteMatch.params
@@ -171,10 +178,14 @@ export function AppSidebar() {
   }
   
   return (
-    <Sidebar
-      collapsible="icon"
-      className="overflow-hidden *:data-[sidebar=sidebar]:flex-row rounded-bl-lg"
-    >
+    <>
+      {/* Search dialog */}
+      <NoteSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      
+      <Sidebar
+        collapsible="icon"
+        className="overflow-hidden *:data-[sidebar=sidebar]:flex-row rounded-bl-lg"
+      >
       {/* This is the first sidebar */}
       {/* We disable collapsible and adjust width to icon. */}
       {/* This will make the sidebar appear as icons. */}
@@ -265,25 +276,49 @@ export function AppSidebar() {
               <span className="text-foreground font-semibold">
                 Notes
               </span>
-              {/* New Note button on right */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-7 w-7" 
-                    aria-label="New Note"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="center" sideOffset={5}>
-                  <div className="flex items-center justify-between">
-                    <p>New Note</p>
-                    <div className="text-xs text-muted-foreground ml-2">⌘N</div>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+              {/* Action buttons on right */}
+              <div className="flex items-center gap-1">
+                {/* Search button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7" 
+                      aria-label="Search Notes"
+                      onClick={() => setSearchOpen(true)}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="center" sideOffset={5}>
+                    <div className="flex items-center justify-between">
+                      <p>Search</p>
+                      <div className="text-xs text-muted-foreground ml-2">⌘K</div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+                
+                {/* New Note button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7" 
+                      aria-label="New Note"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="center" sideOffset={5}>
+                    <div className="flex items-center justify-between">
+                      <p>New Note</p>
+                      <div className="text-xs text-muted-foreground ml-2">⌘N</div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -329,5 +364,6 @@ export function AppSidebar() {
         </Sidebar>
       )}
     </Sidebar>
+    </>
   )
 }

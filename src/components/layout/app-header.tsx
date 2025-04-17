@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useMatches, Link, useRouterState } from "@tanstack/react-router";
 import {
   Breadcrumb,
@@ -12,9 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { Maximize2Icon, MinimizeIcon, SearchIcon } from "lucide-react";
+import { Maximize2Icon, MinimizeIcon } from "lucide-react";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { NoteSearch } from "@/components/search/note-search";
 
 export function AppHeader() {
   const matches = useMatches();
@@ -43,9 +41,6 @@ export function AppHeader() {
   
   // Use the fullscreen hook
   const { isFullscreen, toggleFullscreen } = useFullscreen();
-  
-  // State for search dialog
-  const [searchOpen, setSearchOpen] = useState(false);
   
   // Get a user-friendly title for the current route
   const getRouteTitle = () => {
@@ -120,27 +115,8 @@ export function AppHeader() {
         </BreadcrumbList>
       </Breadcrumb>
       
-      {/* Spacer to push the buttons to the right */}
+      {/* Spacer to push the fullscreen button to the right */}
       <div className="flex-1" />
-      
-      {/* Search button */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setSearchOpen(true)}
-          >
-            <SearchIcon className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" align="center" sideOffset={5}>
-          <div className="flex items-center justify-between">
-            <p>Search Notes</p>
-            <div className="text-xs text-muted-foreground ml-2">⌘K</div>
-          </div>
-        </TooltipContent>
-      </Tooltip>
       
       {/* Fullscreen button */}
       <Tooltip>
@@ -160,9 +136,6 @@ export function AppHeader() {
           </div>
         </TooltipContent>
       </Tooltip>
-      
-      {/* Search dialog */}
-      <NoteSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 }
