@@ -10,10 +10,6 @@ This is a quick guide to help you get started with the core features.
 
 DRNKN Notes uses Markdown for formatting. Here are the essentials:
 
-```html
-<div>Testing out</div>
-```
-
 - **Headings:** Use `#` symbols (e.g., `## Subheading`). More `#` means smaller text.
 - **Emphasis:** `*Italic*` or `_Italic_`, `**Bold**` or `__Bold__`.
 - **Lists:**
