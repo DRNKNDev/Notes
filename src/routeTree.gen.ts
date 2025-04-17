@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as PromptImport } from './routes/prompt'
+import { Route as OnboardingImport } from './routes/onboarding'
 import { Route as NotesImport } from './routes/notes'
 import { Route as JournalImport } from './routes/journal'
 import { Route as IndexImport } from './routes/index'
@@ -23,6 +24,12 @@ import { Route as JournalEntryIdImport } from './routes/journal.$entryId'
 const PromptRoute = PromptImport.update({
   id: '/prompt',
   path: '/prompt',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const OnboardingRoute = OnboardingImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,6 +88,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesImport
       parentRoute: typeof rootRoute
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingImport
+      parentRoute: typeof rootRoute
+    }
     '/prompt': {
       id: '/prompt'
       path: '/prompt'
@@ -132,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/journal': typeof JournalRouteWithChildren
   '/notes': typeof NotesRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/prompt': typeof PromptRoute
   '/journal/$entryId': typeof JournalEntryIdRoute
   '/notes/$noteId': typeof NotesNoteIdRoute
@@ -141,6 +156,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/journal': typeof JournalRouteWithChildren
   '/notes': typeof NotesRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/prompt': typeof PromptRoute
   '/journal/$entryId': typeof JournalEntryIdRoute
   '/notes/$noteId': typeof NotesNoteIdRoute
@@ -151,6 +167,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/journal': typeof JournalRouteWithChildren
   '/notes': typeof NotesRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/prompt': typeof PromptRoute
   '/journal/$entryId': typeof JournalEntryIdRoute
   '/notes/$noteId': typeof NotesNoteIdRoute
@@ -162,6 +179,7 @@ export interface FileRouteTypes {
     | '/'
     | '/journal'
     | '/notes'
+    | '/onboarding'
     | '/prompt'
     | '/journal/$entryId'
     | '/notes/$noteId'
@@ -170,6 +188,7 @@ export interface FileRouteTypes {
     | '/'
     | '/journal'
     | '/notes'
+    | '/onboarding'
     | '/prompt'
     | '/journal/$entryId'
     | '/notes/$noteId'
@@ -178,6 +197,7 @@ export interface FileRouteTypes {
     | '/'
     | '/journal'
     | '/notes'
+    | '/onboarding'
     | '/prompt'
     | '/journal/$entryId'
     | '/notes/$noteId'
@@ -188,6 +208,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JournalRoute: typeof JournalRouteWithChildren
   NotesRoute: typeof NotesRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
   PromptRoute: typeof PromptRoute
 }
 
@@ -195,6 +216,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JournalRoute: JournalRouteWithChildren,
   NotesRoute: NotesRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
   PromptRoute: PromptRoute,
 }
 
@@ -211,6 +233,7 @@ export const routeTree = rootRoute
         "/",
         "/journal",
         "/notes",
+        "/onboarding",
         "/prompt"
       ]
     },
@@ -228,6 +251,9 @@ export const routeTree = rootRoute
       "children": [
         "/notes/$noteId"
       ]
+    },
+    "/onboarding": {
+      "filePath": "onboarding.tsx"
     },
     "/prompt": {
       "filePath": "prompt.tsx"
