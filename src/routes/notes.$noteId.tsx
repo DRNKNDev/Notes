@@ -1,10 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { NoteEditor } from "@/components/editor/note-editor";
 import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import markdownContent from "@/assets/sample-note.md?raw";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { cn } from "@/lib/utils";
+import { useNotesStore } from "@/lib/notes/notes-store";
+import { Note } from "@/lib/notes/types";
+import { Button } from "@/components/ui/button";
+import { Loader2, Save, Trash } from "lucide-react";
+import { toast } from "sonner";
 // This route handles displaying a specific note by its ID
 export const Route = createFileRoute('/notes/$noteId')({  
   component: NoteView
@@ -12,57 +16,78 @@ export const Route = createFileRoute('/notes/$noteId')({
 
 function NoteView() {
   const { noteId } = Route.useParams();
+  const navigate = useNavigate();
   
-  // Sample data for notes (this would typically come from a data store)
-  // Using useState to simulate mutable data source for this example
-  const [notes, setNotes] = useState([
-    {
-      id: "1",
-      title: "Welcome to DRNKN Notes!",
-      date: "09:34 AM",
-      content: markdownContent.split('\n').slice(5).join('\n'), // Get content after frontmatter
-    },
-    {
-      id: "2",
-      title: "Project Update",
-      date: "Yesterday",
-      content: "Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps.",
-    },
-    {
-      id: "3",
-      title: "Weekend Plans",
-      date: "2 days ago",
-      content: "Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?",
-    },
-    {
-      id: "4",
-      title: "Important Announcement",
-      date: "1 week ago",
-      content: "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future.",
-    }
-  ]);
+  // Get notes and actions from the store
+  const { 
+    notes, 
+    saveNote, 
+    deleteNote, 
+    isLoading, 
+    error 
+  } = useNotesStore();
   
-  // Find the note with the matching ID
-  const note = notes.find(note => note.id === noteId);
+  // State for tracking if we're currently saving
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // State for the combined markdown content in the editor
   const [editorMarkdown, setEditorMarkdown] = useState<string>('');
-
+  
+  // State for the current note title
+  const [currentTitle, setCurrentTitle] = useState<string>('');
+  
+  // Find the note with the matching ID
+  const note = notes.find(note => note.id === noteId) as Note | undefined;
+  
+  // Handle error states
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="text-destructive mb-2">Error loading note</p>
+          <p className="text-muted-foreground text-sm mb-4">{error}</p>
+          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
+            Back to Notes
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  
+  // Handle note not found
   if (!note) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">Note not found</p>
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Note not found</p>
+          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
+            Back to Notes
+          </Button>
+        </div>
       </div>
     );
   }
   
   // Initialize editor markdown when noteId changes
   useEffect(() => {
-    // Construct initial editor markdown
-    const initialTitle = note.title || 'Untitled';
-    const initialContent = note.content || '';
-    const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
-    setEditorMarkdown(initialMarkdown);
+    if (note) {
+      // Construct initial editor markdown
+      const initialTitle = note.title || 'Untitled';
+      const initialContent = note.bodyContent || '';
+      const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
+      setEditorMarkdown(initialMarkdown);
+      setCurrentTitle(initialTitle);
+    }
   }, [noteId, note]);
 
   // Handle editor content changes
@@ -73,12 +98,52 @@ function NoteView() {
   
   // Handle title changes separately
   const handleTitleChange = (newTitle: string) => {
-    // Update the notes data with the new title
-    setNotes(prevNotes => 
-      prevNotes.map(n => 
-        n.id === noteId ? { ...n, title: newTitle } : n
-      )
-    );
+    setCurrentTitle(newTitle);
+  };
+  
+  // Save the current note
+  const handleSave = async () => {
+    if (!note) return;
+    
+    try {
+      setIsSaving(true);
+      
+      // Use the full markdown content for saving
+      const noteContent = editorMarkdown;
+      
+      // Save the note - pass the noteId, content, and title separately
+      await saveNote(note.id, noteContent, currentTitle);
+      toast.success("Note saved successfully", {
+        description: "Your changes have been saved to disk"
+      });
+    } catch (error) {
+      console.error("Error saving note:", error);
+      toast.error("Failed to save note", {
+        description: "Please try again or check console for details"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Delete the current note
+  const handleDelete = async () => {
+    if (!note) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteNote(note.id);
+      toast.success("Note deleted successfully", {
+        description: "The note has been permanently removed"
+      });
+      navigate({ to: '/notes', search: {} });
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      toast.error("Failed to delete note", {
+        description: "Please try again or check console for details"
+      });
+      setIsDeleting(false);
+    }
   };
   
   // Get fullscreen state
@@ -86,6 +151,50 @@ function NoteView() {
 
   return (
     <div className="h-full flex flex-col">
+      {/* Note actions toolbar */}
+      <div className="border-b p-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </>
+            )}
+          </Button>
+        </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="text-destructive hover:bg-destructive/10"
+        >
+          {isDeleting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Deleting...
+            </>
+          ) : (
+            <>
+              <Trash className="h-4 w-4 mr-2" />
+              Delete
+            </>
+          )}
+        </Button>
+      </div>
+      
       <ScrollArea className="flex-1 h-full w-full">
         <div className={cn(
           "min-h-full",
