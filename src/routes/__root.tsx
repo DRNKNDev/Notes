@@ -32,7 +32,7 @@ export const Route = createRootRoute({
         )}
         
         {/* Show devtools in development unless explicitly disabled */}
-        {import.meta.env.DEV && !import.meta.env.VITE_DISABLE_ROUTER_DEVTOOLS && <TanStackRouterDevtools />}
+        {import.meta.env.DEV && import.meta.env.VITE_ENABLE_ROUTER_DEVTOOLS && <TanStackRouterDevtools />}
       </div>
     );
   },
