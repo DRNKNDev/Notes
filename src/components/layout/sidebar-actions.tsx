@@ -78,7 +78,7 @@ export function SidebarActions() {
           <TooltipContent side="right" align="center" sideOffset={5}>
             <div className="flex items-center justify-between">
               <p>Settings</p>
-              <div className="text-xs text-muted-foreground ml-2">⌘,</div>
+              <div className="text-xs text-muted ml-2">⌘,</div>
             </div>
           </TooltipContent>
         </Tooltip>

@@ -231,7 +231,7 @@ export function AppSidebar() {
                           <div className="flex items-center justify-between">
                             <div>{item.title}</div>
                             {item.shortcut && (
-                              <div className="text-xs text-muted-foreground ml-2">{item.shortcut}</div>
+                              <div className="text-xs text-muted ml-2">{item.shortcut}</div>
                             )}
                           </div>
                         )
