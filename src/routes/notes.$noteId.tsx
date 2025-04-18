@@ -83,9 +83,23 @@ function NoteView() {
     if (note) {
       // Construct initial editor markdown
       const initialTitle = note.title || 'Untitled';
-      const initialContent = note.bodyContent || '';
-      const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
-      setEditorMarkdown(initialMarkdown);
+      
+      // Check if bodyContent already starts with a title
+      let initialContent = note.bodyContent || '';
+      
+      // Remove any existing H1 header to prevent duplication
+      if (initialContent.trim().startsWith('# ')) {
+        // Content already has a header, use it as is
+        const initialMarkdown = initialContent;
+        console.log('Using existing markdown with header:', initialMarkdown);
+        setEditorMarkdown(initialMarkdown);
+      } else {
+        // Content doesn't have a header, add one
+        const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
+        console.log('Constructed markdown with new header:', initialMarkdown);
+        setEditorMarkdown(initialMarkdown);
+      }
+      
       setCurrentTitle(initialTitle);
     }
   }, [noteId, note]);
