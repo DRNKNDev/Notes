@@ -93,7 +93,7 @@ export function AppHeader() {
             <TooltipContent side="bottom" align="center" sideOffset={5}>
               <div className="flex items-center justify-between">
                 <p>Toggle Sidebar</p>
-                <div className="text-xs text-muted-foreground ml-2">⌘⇧B</div>
+                <div className="text-xs text-muted ml-2">⌘⇧B</div>
               </div>
             </TooltipContent>
           </Tooltip>
@@ -153,7 +153,7 @@ export function AppHeader() {
         <TooltipContent side="bottom" align="center" sideOffset={5}>
           <div className="flex items-center justify-between">
             <p>Toggle Fullscreen</p>
-            <div className="text-xs text-muted-foreground ml-2">⌃⌘F</div>
+            <div className="text-xs text-muted ml-2">⌃⌘F</div>
           </div>
         </TooltipContent>
       </Tooltip>

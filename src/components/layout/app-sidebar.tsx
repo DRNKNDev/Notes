@@ -300,7 +300,7 @@ export function AppSidebar() {
                   <TooltipContent side="bottom" align="center" sideOffset={5}>
                     <div className="flex items-center justify-between">
                       <p>Search</p>
-                      <div className="text-xs text-muted-foreground ml-2">⌘K</div>
+                      <div className="text-xs text-muted ml-2">⌘K</div>
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -320,7 +320,7 @@ export function AppSidebar() {
                   <TooltipContent side="bottom" align="center" sideOffset={5}>
                     <div className="flex items-center justify-between">
                       <p>New Note</p>
-                      <div className="text-xs text-muted-foreground ml-2">⌘N</div>
+                      <div className="text-xs text-muted ml-2">⌘N</div>
                     </div>
                   </TooltipContent>
                 </Tooltip>
