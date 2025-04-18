@@ -1,5 +1,5 @@
 ---
-title: Quick Start
+title: Welcome to DRNKN Notes!
 date: 2025-04-17
 tags: [markdown, guide]
 ---

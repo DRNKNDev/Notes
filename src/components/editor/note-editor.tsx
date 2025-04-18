@@ -7,39 +7,59 @@ import {
   markdownShortcutPlugin, 
   codeBlockPlugin, 
   linkPlugin, 
-  frontmatterPlugin,
   codeMirrorPlugin, 
 } from "@mdxeditor/editor"
-import { FrontMatterEditor, FrontMatterData } from "./frontmatter-editor";
 import { useThemeContext } from "@/components/theme-provider";
 import { tailwindCodeMirrorExtensions } from './codemirror-theme';
+import { useRef } from 'react';
+import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
 
 interface NoteEditorProps {
-  frontMatter: FrontMatterData
   markdown: string
-  onFrontMatterChange: (data: FrontMatterData) => void
+  onChange: (markdown: string) => void
+  onTitleChange?: (title: string) => void
 }
 
 export function NoteEditor({
-  frontMatter,
   markdown,
-  onFrontMatterChange,
+  onChange,
+  onTitleChange,
 }: NoteEditorProps) {
   const { effectiveTheme } = useThemeContext(); // Get current theme
   const isDarkMode = effectiveTheme === 'dark';
+  
+  // Use a ref to track if we're currently handling an update to prevent circular updates
+  const isUpdatingRef = useRef(false);
+  
+  // Handle markdown changes with title extraction
+  const handleMarkdownChange = (newMarkdown: string) => {
+    // Prevent circular updates
+    if (isUpdatingRef.current) return;
+    
+    try {
+      isUpdatingRef.current = true;
+      
+      // Parse the markdown to extract title
+      const parsed = parseMarkdownWithTitle(newMarkdown);
+      
+      // Notify parent about title change if callback provided
+      if (onTitleChange && parsed.title) {
+        onTitleChange(parsed.title);
+      }
+      
+      // Pass the full markdown to parent's onChange handler
+      onChange(parsed.fullMarkdown);
+    } finally {
+      // Always reset the flag when done
+      isUpdatingRef.current = false;
+    }
+  };
 
   return (
     <div className="flex flex-col w-full">
-      <div className="mb-2">
-        <FrontMatterEditor
-          key={frontMatter.title} // Use title as key to force re-render when frontMatter changes
-          frontMatter={frontMatter}
-          onChange={onFrontMatterChange}
-        />
-      </div>
       <MDXEditor
-      key={markdown.substring(0, 40)} // Use part of the content as key to force re-render when content changes
       markdown={markdown}
+      onChange={handleMarkdownChange}
       plugins={
         [
           headingsPlugin(),
@@ -74,7 +94,6 @@ export function NoteEditor({
             codeMirrorExtensions: tailwindCodeMirrorExtensions, // <-- Use imported extensions
           }),
           linkPlugin(),
-          frontmatterPlugin(),
           markdownShortcutPlugin(),
         ] as any
       }

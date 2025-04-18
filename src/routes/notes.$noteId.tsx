@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { NoteEditor } from "@/components/editor/note-editor";
 import { useState, useEffect } from "react";
-import { FrontMatterData } from "@/components/editor/frontmatter-editor";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import markdownContent from "@/assets/sample-note.md?raw";
 import { useFullscreen } from "@/hooks/use-fullscreen";
@@ -15,12 +14,13 @@ function NoteView() {
   const { noteId } = Route.useParams();
   
   // Sample data for notes (this would typically come from a data store)
-  const notes = [
+  // Using useState to simulate mutable data source for this example
+  const [notes, setNotes] = useState([
     {
       id: "1",
       title: "Welcome to DRNKN Notes!",
       date: "09:34 AM",
-      content: markdownContent,
+      content: markdownContent.split('\n').slice(5).join('\n'), // Get content after frontmatter
     },
     {
       id: "2",
@@ -40,11 +40,14 @@ function NoteView() {
       date: "1 week ago",
       content: "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future.",
     }
-  ];
+  ]);
   
   // Find the note with the matching ID
   const note = notes.find(note => note.id === noteId);
   
+  // State for the combined markdown content in the editor
+  const [editorMarkdown, setEditorMarkdown] = useState<string>('');
+
   if (!note) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -53,24 +56,29 @@ function NoteView() {
     );
   }
   
-  // Create state for frontMatter and handle changes
-  const [frontMatter, setFrontMatter] = useState<FrontMatterData>({
-    title: note.title,
-    tags: [],
-    date: note.date
-  });
-  
-  // Reset frontMatter when noteId changes
+  // Initialize editor markdown when noteId changes
   useEffect(() => {
-    setFrontMatter({
-      title: note.title,
-      tags: [],
-      date: note.date
-    });
-  }, [noteId, note.title, note.date]);
+    // Construct initial editor markdown
+    const initialTitle = note.title || 'Untitled';
+    const initialContent = note.content || '';
+    const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
+    setEditorMarkdown(initialMarkdown);
+  }, [noteId, note]);
 
-  const handleFrontMatterChange = (data: FrontMatterData) => {
-    setFrontMatter(data);
+  // Handle editor content changes
+  const handleEditorChange = (newMarkdown: string) => {
+    // Update the editor markdown state
+    setEditorMarkdown(newMarkdown);
+  };
+  
+  // Handle title changes separately
+  const handleTitleChange = (newTitle: string) => {
+    // Update the notes data with the new title
+    setNotes(prevNotes => 
+      prevNotes.map(n => 
+        n.id === noteId ? { ...n, title: newTitle } : n
+      )
+    );
   };
   
   // Get fullscreen state
@@ -85,9 +93,9 @@ function NoteView() {
         )}>
           <NoteEditor 
             key={noteId} // Use noteId as key to force complete re-render when switching notes
-            frontMatter={frontMatter}
-            markdown={note.content}
-            onFrontMatterChange={handleFrontMatterChange}
+            markdown={editorMarkdown} // Pass combined markdown
+            onChange={handleEditorChange} // Pass the content change handler
+            onTitleChange={handleTitleChange} // Pass the title change handler
           />
         </div>
       </ScrollArea>
