@@ -35,6 +35,11 @@ export function useKeyboardShortcuts() {
             event.preventDefault();
             navigate({ to: '/notes' });
             break;
+          case ',':
+            // Command + , for Settings
+            event.preventDefault();
+            navigate({ to: '/settings', search: { category: 'general' } });
+            break;
           default:
             // Do nothing for other key combinations
             break;
