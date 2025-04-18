@@ -4,6 +4,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute('/')({  
   beforeLoad: () => {
     // Redirect to the notes route
-    throw redirect({ to: '/notes' })
+    throw redirect({ to: '/onboarding' })
   }
 });
