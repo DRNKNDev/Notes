@@ -2,6 +2,7 @@ import { Moon, Settings, Sun } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import useTheme from "@/hooks/use-theme";
+import { Link } from "@tanstack/react-router";
 
 export function SidebarActions() {
 
@@ -56,11 +57,22 @@ export function SidebarActions() {
         <Tooltip>
           <TooltipTrigger asChild>
             <SidebarMenuButton 
-              onClick={() => {}} 
+              asChild
               className="justify-start w-full"
             >
-              <Settings className="size-4 mr-2" />
-              <span className="text-sm font-medium">Settings</span>
+              <Link
+                to="/settings"
+                search={{ category: 'general' }}
+                activeOptions={{
+                  includeSearch: false
+                }}
+                activeProps={{
+                  className: "bg-sidebar-accent text-sidebar-accent-foreground",
+                }}
+              >
+                <Settings className="size-4 mr-2" />
+                <span className="text-sm font-medium">Settings</span>
+              </Link>
             </SidebarMenuButton>
           </TooltipTrigger>
           <TooltipContent side="right" align="center" sideOffset={5}>

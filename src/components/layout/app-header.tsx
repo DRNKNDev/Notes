@@ -15,32 +15,30 @@ import { Maximize2Icon, MinimizeIcon } from "lucide-react";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 
 export function AppHeader() {
+  // Always call hooks at the top level
   const matches = useMatches();
+  const routerState = useRouterState();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+  
+  // Get route parameters safely
+  const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
+  const params = currentRouteMatch?.params || {};
+  const noteId = 'noteId' in params ? String(params.noteId) : undefined;
+  const entryId = 'entryId' in params ? String(params.entryId) : undefined;
+  
+  // Get settings category
+  const settingsCategory = 
+    currentRouteMatch?.pathname.startsWith('/settings') && 
+    currentRouteMatch.search && 
+    'category' in currentRouteMatch.search && 
+    currentRouteMatch.search.category === 'themes' ? 'themes' : 'general';
   
   // Get the current route path (for breadcrumb and header title)
   const currentRoute = matches.length > 0 ? matches[matches.length - 1] : null;
   const routePath = currentRoute?.pathname || "/";
   
-  // Get current router state to safely check for route parameters
-  const routerState = useRouterState();
-  const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
-  
-  // Safely extract route parameters
-  const isNoteDetailRoute = currentRouteMatch?.routeId.includes('$noteId');
-  const noteId = isNoteDetailRoute && 'noteId' in currentRouteMatch.params 
-    ? String(currentRouteMatch.params.noteId) 
-    : undefined;
-    
-  const isJournalEntryRoute = currentRouteMatch?.routeId.includes('$entryId');
-  const entryId = isJournalEntryRoute && 'entryId' in currentRouteMatch.params 
-    ? String(currentRouteMatch.params.entryId) 
-    : undefined;
-  
   // Determine if we should hide the sidebar trigger based on the route
   const hideSecondarySidebar = routePath === "/prompt";
-  
-  // Use the fullscreen hook
-  const { isFullscreen, toggleFullscreen } = useFullscreen();
   
   // Get a user-friendly title for the current route
   const getRouteTitle = () => {
@@ -73,6 +71,9 @@ export function AppHeader() {
       }
       return "Notes";
     }
+    if (routePath.startsWith("/settings")) {
+      return "Settings";
+    }
     return "Notes"; // Default
   };
 
@@ -101,17 +102,37 @@ export function AppHeader() {
       )}
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem className="hidden md:block text-xs">
-            <BreadcrumbLink asChild>
-              <Link to="/notes">All Notes</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator className="hidden md:block" />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="text-xs">
-              {getRouteTitle()}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
+          {routePath.startsWith("/settings") ? (
+            // Settings breadcrumb
+            <>
+              <BreadcrumbItem className="hidden md:block text-xs">
+                <BreadcrumbLink asChild>
+                  <Link to="/settings" search={{ category: 'general' }}>Settings</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs">
+                  {settingsCategory === 'themes' ? 'Themes' : 'General'}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          ) : (
+            // Notes breadcrumb
+            <>
+              <BreadcrumbItem className="hidden md:block text-xs">
+                <BreadcrumbLink asChild>
+                  <Link to="/notes">All Notes</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs">
+                  {getRouteTitle()}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          )}
         </BreadcrumbList>
       </Breadcrumb>
       

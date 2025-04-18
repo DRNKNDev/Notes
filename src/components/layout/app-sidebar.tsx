@@ -1,4 +1,4 @@
-import { BookText, Command, PenLine, Plus, Search } from "lucide-react"
+import { BookText, Command, PenLine, Plus, Search, Settings, Sliders, Palette } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
 import { useFullscreen } from "@/hooks/use-fullscreen"
 
@@ -147,10 +147,16 @@ export function AppSidebar() {
   const currentRouteMatch = routerState.matches[routerState.matches.length - 1]
   const currentPath = currentRouteMatch?.pathname || "/"
   
-  // Determine if we're on notes or journal route
+  // Determine if we're on notes, journal, or settings route
   const isNotesRoute = currentPath.startsWith("/notes")
   const isJournalRoute = currentPath.startsWith("/journal")
   const isPromptRoute = currentPath.startsWith("/prompt")
+  const isSettingsRoute = currentPath.startsWith("/settings")
+  
+  // Get settings category from URL or default to "general"
+  const settingsCategory = isSettingsRoute && currentRouteMatch?.search && 'category' in currentRouteMatch.search
+    ? String(currentRouteMatch.search.category)
+    : "general"
   
   // State for search dialog
   const [searchOpen, setSearchOpen] = useState(false)
@@ -265,7 +271,7 @@ export function AppSidebar() {
       {/* This is the second sidebar */}
       {/* We disable collapsible and let it fill remaining space */}
       {/* Hide the secondary sidebar when Prompt or Journal is active */}
-      {!isPromptRoute && !isJournalRoute && (
+      {!isPromptRoute && !isJournalRoute && !isSettingsRoute && (
         <Sidebar
           collapsible="none"
           className="flex-1"
@@ -363,7 +369,61 @@ export function AppSidebar() {
           </SidebarContent>
         </Sidebar>
       )}
+      {isSettingsRoute && (
+        <Sidebar
+          collapsible="none"
+          className="flex-1"
+        >
+          <SidebarHeader className="h-10 border-b border-muted p-0">
+            <div className="flex w-full h-10 items-center justify-between px-2">
+              {/* Settings title on left */}
+              <span className="text-foreground font-semibold">
+                Settings
+              </span>
+              {/* Action buttons could go here if needed */}
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+            <ScrollArea className="h-full">
+              <div className="p-2">
+                <SidebarGroup>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      <SidebarMenuItem>
+                        <Link
+                          to="/settings"
+                          search={{ category: 'general' }}
+                          className={cn(
+                            "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                            settingsCategory === "general" && "bg-muted font-medium"
+                          )}
+                        >
+                          <Sliders className="h-4 w-4" />
+                          <span className="text-sm">General</span>
+                        </Link>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <Link
+                          to="/settings"
+                          search={{ category: 'themes' }}
+                          className={cn(
+                            "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                            settingsCategory === "themes" && "bg-muted font-medium"
+                          )}
+                        >
+                          <Palette className="h-4 w-4" />
+                          <span className="text-sm">Themes</span>
+                        </Link>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              </div>
+            </ScrollArea>
+          </SidebarContent>
+        </Sidebar>
+      )}
     </Sidebar>
-    </>
-  )
+  </>
+  );
 }
