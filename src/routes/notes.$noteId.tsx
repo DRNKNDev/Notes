@@ -37,9 +37,39 @@ function NoteView() {
   // State for the current note title
   const [currentTitle, setCurrentTitle] = useState<string>('');
   
+  // Get fullscreen state
+  const { isFullscreen } = useFullscreen();
+  
   // Find the note with the matching ID
   const note = notes.find(note => note.id === noteId) as Note | undefined;
   
+  // Initialize editor markdown when noteId changes or note data loads
+  useEffect(() => {
+    if (note) {
+      // Construct initial editor markdown
+      const initialTitle = note.title || 'Untitled';
+      
+      // Check if bodyContent already starts with a title
+      let initialContent = note.bodyContent || '';
+      
+      // Ensure consistent line endings (convert CRLF to LF)
+      initialContent = initialContent.replace(/\r\n/g, '\n');
+      
+      // Remove any existing H1 header to prevent duplication
+      if (initialContent.trim().startsWith('# ')) {
+        // Content already has a header, use it as is
+        const initialMarkdown = initialContent;
+        setEditorMarkdown(initialMarkdown);
+      } else {
+        // Content doesn't have a header, add one
+        const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
+        setEditorMarkdown(initialMarkdown);
+      }
+      
+      setCurrentTitle(initialTitle);
+    }
+  }, [noteId, note]); // Depend on noteId and the note object itself
+
   // Handle error states
   if (error) {
     return (
@@ -78,33 +108,6 @@ function NoteView() {
     );
   }
   
-  // Initialize editor markdown when noteId changes
-  useEffect(() => {
-    if (note) {
-      // Construct initial editor markdown
-      const initialTitle = note.title || 'Untitled';
-      
-      // Check if bodyContent already starts with a title
-      let initialContent = note.bodyContent || '';
-      
-      // Ensure consistent line endings (convert CRLF to LF)
-      initialContent = initialContent.replace(/\r\n/g, '\n');
-      
-      // Remove any existing H1 header to prevent duplication
-      if (initialContent.trim().startsWith('# ')) {
-        // Content already has a header, use it as is
-        const initialMarkdown = initialContent;
-        setEditorMarkdown(initialMarkdown);
-      } else {
-        // Content doesn't have a header, add one
-        const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
-        setEditorMarkdown(initialMarkdown);
-      }
-      
-      setCurrentTitle(initialTitle);
-    }
-  }, [noteId, note]);
-
   // Handle editor content changes
   const handleEditorChange = (newMarkdown: string) => {
     // Update the editor markdown state
@@ -160,9 +163,6 @@ function NoteView() {
       setIsDeleting(false);
     }
   };
-  
-  // Get fullscreen state
-  const { isFullscreen } = useFullscreen();
 
   return (
     <div className="h-full flex flex-col">
