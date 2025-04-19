@@ -7,12 +7,34 @@ import {
   markdownShortcutPlugin, 
   codeBlockPlugin, 
   linkPlugin, 
-  codeMirrorPlugin, 
+  codeMirrorPlugin,
+  MDXEditorMethods
 } from "@mdxeditor/editor"
 import { useThemeContext } from "@/components/theme-provider";
 import { tailwindCodeMirrorExtensions } from './codemirror-theme';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
+
+/**
+ * Normalizes markdown content to ensure consistent formatting
+ * This helps prevent cursor position issues in the MDXEditor
+ */
+function normalizeMarkdown(content: string | undefined): string {
+  if (!content) return '# Default Note\n\nStart writing here...\n';
+  
+  // Ensure consistent line endings (convert CRLF to LF)
+  let normalized = content.replace(/\r\n/g, '\n');
+  
+  // Ensure content ends with newline
+  if (!normalized.endsWith('\n')) {
+    normalized += '\n';
+  }
+  
+  // Ensure no consecutive triple newlines (can cause issues)
+  normalized = normalized.replace(/\n{3,}/g, '\n\n');
+  
+  return normalized;
+}
 
 interface NoteEditorProps {
   markdown: string
@@ -25,6 +47,8 @@ export function NoteEditor({
   onChange,
   onTitleChange,
 }: NoteEditorProps) {
+  // Create a ref to access editor methods
+  const editorRef = useRef<MDXEditorMethods>(null);
   const { effectiveTheme } = useThemeContext(); // Get current theme
   const isDarkMode = effectiveTheme === 'dark';
   
@@ -55,11 +79,24 @@ export function NoteEditor({
     }
   };
 
+  // Use the normalizeMarkdown function to ensure consistent formatting
+  const safeMarkdown = normalizeMarkdown(markdown);
+  
+  // Handle editor errors
+  const handleError = (payload: { error: string; source: string }) => {
+    console.error('MDXEditor error:', payload.error, 'Source:', payload.source);
+    // Prevent the error from crashing the app
+    // You could also implement a retry mechanism here
+  };
+  
   return (
     <div className="flex flex-col w-full">
       <MDXEditor
-      markdown={markdown}
+      ref={editorRef}
+      key={safeMarkdown.substring(0, 20)}
+      markdown={safeMarkdown}
       onChange={handleMarkdownChange}
+      onError={handleError}
       plugins={
         [
           headingsPlugin(),
@@ -67,7 +104,7 @@ export function NoteEditor({
           quotePlugin(),
           thematicBreakPlugin(),
           codeBlockPlugin(), 
-          codeMirrorPlugin({ 
+          codeMirrorPlugin({
             codeBlockLanguages: {
               html: 'HTML',
               css: 'CSS',
