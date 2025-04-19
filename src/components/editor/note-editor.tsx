@@ -103,7 +103,9 @@ export function NoteEditor({
           listsPlugin(),
           quotePlugin(),
           thematicBreakPlugin(),
-          codeBlockPlugin(), 
+          codeBlockPlugin({
+            defaultCodeBlockLanguage: 'txt'
+          }), 
           codeMirrorPlugin({
             codeBlockLanguages: {
               html: 'HTML',
