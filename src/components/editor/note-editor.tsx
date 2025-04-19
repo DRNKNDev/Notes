@@ -12,7 +12,7 @@ import {
 } from "@mdxeditor/editor"
 import { useThemeContext } from "@/components/theme-provider";
 import { tailwindCodeMirrorExtensions } from './codemirror-theme';
-import { useRef } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
 
 /**
@@ -64,8 +64,14 @@ export function NoteEditor({
     safeMarkdown.current = normalizeMarkdown(markdown);
   }
   
-  // Handle markdown changes with title extraction
-  const handleMarkdownChange = (newMarkdown: string) => {
+  // Store the latest markdown in a ref to use in the debounced function
+  const latestMarkdownRef = useRef<string>('');
+  
+  // Create a timeout ref for debouncing
+  const debounceTimeoutRef = useRef<number | null>(null);
+  
+  // Handle markdown changes with title extraction and debouncing
+  const processMarkdownChange = useCallback((markdown: string) => {
     // Prevent circular updates
     if (isUpdatingRef.current) return;
     
@@ -73,7 +79,7 @@ export function NoteEditor({
       isUpdatingRef.current = true;
       
       // Parse the markdown to extract title
-      const parsed = parseMarkdownWithTitle(newMarkdown);
+      const parsed = parseMarkdownWithTitle(markdown);
       
       // Notify parent about title change if callback provided
       if (onTitleChange && parsed.title) {
@@ -86,7 +92,33 @@ export function NoteEditor({
       // Always reset the flag when done
       isUpdatingRef.current = false;
     }
-  };
+  }, [onChange, onTitleChange]);
+  
+  // Debounced handler for markdown changes
+  const handleMarkdownChange = useCallback((newMarkdown: string) => {
+    // Store the latest markdown
+    latestMarkdownRef.current = newMarkdown;
+    
+    // Clear any existing timeout
+    if (debounceTimeoutRef.current !== null) {
+      window.clearTimeout(debounceTimeoutRef.current);
+    }
+    
+    // Set a new timeout
+    debounceTimeoutRef.current = window.setTimeout(() => {
+      processMarkdownChange(latestMarkdownRef.current);
+      debounceTimeoutRef.current = null;
+    }, 500); // 500ms debounce delay
+  }, [processMarkdownChange]);
+  
+  // Clean up the timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current !== null) {
+        window.clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // Handle editor errors
   const handleError = (payload: { error: string; source: string }) => {
