@@ -285,45 +285,44 @@ export const useNotesStore = create<NotesState>()(
           }
           
           // Update the note file with the reconstructed content
-          const updatedNoteMetadata = await updateNoteFile(
-            paths,
-            noteId,
-            finalContent // Pass the reconstructed content
-          );
+          const updatedNote = await updateNoteFile(paths, noteId, finalContent);
           
-          // Read the full updated note
-          const noteFile = notes.find((note) => note.id === noteId);
-          if (!noteFile) {
-            throw new Error(`Note not found: ${noteId}`);
-          }
-          
-          const updatedNote = await readNoteFile(notesPath, noteFile.relativePath);
-          
-          // Update the notes array
-          const updatedNotes = notes.map((note) =>
-            note.id === noteId ? { ...note, ...updatedNoteMetadata } : note
-          );
+          // Update the notes array - handle the case where the ID might have changed
+          const updatedNotes = notes.map((note) => {
+            // If this is the note we just updated
+            if (note.id === noteId) {
+              // Return the updated note with all new data
+              return updatedNote;
+            }
+            // Ensure each note has the required Note properties
+            return note as Note;
+          });
           
           // Update the search index
           const updatedIndex = await updateSearchIndex(
             paths,
-            updatedNotes.map((note) => 
-              note.id === noteId ? updatedNote : note as Note
-            ),
+            updatedNotes,
             searchIndex,
             "update",
-            noteId
+            updatedNote.id // Use the potentially new ID
           );
           
           // Update state
-          set({
-            notes: updatedNotes,
+          const newState: Partial<NotesState> = {
+            notes: updatedNotes as Note[],
             searchIndex: updatedIndex,
             activeNoteContent: updatedNote.content,
             isLoading: false,
-          });
+          };
           
-          return updatedNoteMetadata;
+          // If the ID has changed, update the activeNoteId
+          if (noteId !== updatedNote.id && get().activeNoteId === noteId) {
+            newState.activeNoteId = updatedNote.id;
+          }
+          
+          set(newState);
+          
+          return updatedNote;
         } catch (error) {
           console.error(`Error saving note ${noteId}:`, error);
           set({

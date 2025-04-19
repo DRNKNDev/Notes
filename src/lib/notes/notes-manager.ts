@@ -169,13 +169,13 @@ export async function readNoteFile(
  * @param paths Storage paths
  * @param noteId ID of the note to update
  * @param content New content (with or without front matter)
- * @returns The updated note metadata
+ * @returns The updated note with full content
  */
 export async function updateNoteFile(
   paths: StoragePaths,
   noteId: string,
   content: string
-): Promise<NoteMetadata> {
+): Promise<Note> {
   try {
     // Find the note file by ID
     const entries = await listNoteFiles(paths.notesPath);
@@ -205,6 +205,12 @@ export async function updateNoteFile(
       updatedContent = content.replace(/^# .*?(\n|$)/, '').trim();
     }
     
+    // Check if title has changed
+    const titleChanged = updatedTitle !== note.title;
+    
+    // Generate a new ID if the title has changed
+    const updatedId = titleChanged ? generateNoteId(updatedTitle) : note.id;
+    
     // Create frontmatter content with YAML
     let tagsString = '';
     if (note.tags && note.tags.length > 0) {
@@ -216,19 +222,46 @@ export async function updateNoteFile(
 title: "${updatedTitle}"
 createdAt: "${note.createdAt}"
 updatedAt: "${now}"
-id: "${note.id}"
+id: "${updatedId}"
 ${tagsString}---
 
 ${updatedContent}`;
     
-    // Write the updated file
-    await fs.writeTextFile(note.filePath, fileContent);
+    // Determine file paths
+    const oldFilePath = note.filePath;
+    let newFilePath = oldFilePath;
+    let newRelativePath = note.relativePath;
     
-    // Return the updated metadata
+    // If title changed, create a new file name
+    if (titleChanged) {
+      const newFileName = `${updatedId}.md`;
+      newRelativePath = newFileName;
+      newFilePath = await path.join(paths.notesPath, newFileName);
+    }
+    
+    // Write to the new file path
+    await fs.writeTextFile(newFilePath, fileContent);
+    
+    // If the file path changed, delete the old file
+    if (titleChanged && oldFilePath !== newFilePath) {
+      try {
+        await fs.remove(oldFilePath);
+      } catch (deleteError) {
+        console.warn(`Warning: Could not delete old file ${oldFilePath}:`, deleteError);
+        // Continue even if delete fails
+      }
+    }
+    
+    // Return the updated note with full content
     return {
       ...note,
+      id: updatedId,
       title: updatedTitle,
       updatedAt: now,
+      relativePath: newRelativePath,
+      filePath: newFilePath,
+      content: fileContent,
+      bodyContent: updatedContent,
     };
   } catch (error) {
     console.error("Error updating note file:", error);
