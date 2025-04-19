@@ -12,14 +12,15 @@ import {
 } from "@mdxeditor/editor"
 import { useThemeContext } from "@/components/theme-provider";
 import { tailwindCodeMirrorExtensions } from './codemirror-theme';
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
 
 /**
  * Normalizes markdown content to ensure consistent formatting
  * This helps prevent cursor position issues in the MDXEditor
  */
-function normalizeMarkdown(content: string | undefined): string {
+function normalizeMarkdown(content: string | null | undefined): string {
+  console.log('normalizeMarkdown', content);
   if (!content) return '# Default Note\n\nStart writing here...\n';
   
   // Ensure consistent line endings (convert CRLF to LF)
@@ -37,7 +38,7 @@ function normalizeMarkdown(content: string | undefined): string {
 }
 
 interface NoteEditorProps {
-  markdown: string
+  markdown: string | null
   onChange: (markdown: string) => void
   onTitleChange?: (title: string) => void
 }

@@ -261,8 +261,35 @@ export const useNotesStore = create<NotesState>()(
             indexPath,
           };
           
-          // Update the note file
-          const updatedNoteMetadata = await updateNoteFile(paths, noteId, title, content);
+          // Prepare the content to be saved
+          let finalContent = content;
+          if (title) {
+            // Extract body (everything after the first H1 or the whole content if no H1)
+            const lines = content.split('\n');
+            const firstH1Index = lines.findIndex(line => line.trim().startsWith('# '));
+            let body = '';
+            if (firstH1Index !== -1) {
+              // Skip the H1 line and the first blank line after it, if exists
+              let startIndex = firstH1Index + 1;
+              if (lines[startIndex] && lines[startIndex].trim() === '') {
+                startIndex++;
+              }
+              body = lines.slice(startIndex).join('\n');
+            } else {
+              // No H1 found, use the whole content as body
+              body = content;
+            }
+            
+            // Reconstruct with the new title
+            finalContent = `# ${title}\n\n${body.trimStart()}`;
+          }
+          
+          // Update the note file with the reconstructed content
+          const updatedNoteMetadata = await updateNoteFile(
+            paths,
+            noteId,
+            finalContent // Pass the reconstructed content
+          );
           
           // Read the full updated note
           const noteFile = notes.find((note) => note.id === noteId);

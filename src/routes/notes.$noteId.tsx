@@ -32,7 +32,8 @@ function NoteView() {
   const [isDeleting, setIsDeleting] = useState(false);
   
   // State for the combined markdown content in the editor
-  const [editorMarkdown, setEditorMarkdown] = useState<string>('');
+  // Initialize with null to indicate content is not yet loaded
+  const [editorMarkdown, setEditorMarkdown] = useState<string | null>(null);
   
   // State for the current note title
   const [currentTitle, setCurrentTitle] = useState<string>('');
@@ -121,7 +122,7 @@ function NoteView() {
   
   // Save the current note
   const handleSave = async () => {
-    if (!note) return;
+    if (!note || editorMarkdown === null) return;
     
     try {
       setIsSaving(true);
@@ -215,12 +216,14 @@ function NoteView() {
           "min-h-full",
           isFullscreen ? "p-40 pt-20" : "px-6 pb-20"
         )}>
-          <NoteEditor 
-            key={noteId} // Use noteId as key to force complete re-render when switching notes
-            markdown={editorMarkdown} // Pass combined markdown
-            onChange={handleEditorChange} // Pass the content change handler
-            onTitleChange={handleTitleChange} // Pass the title change handler
-          />
+          {editorMarkdown !== null ? (
+            <NoteEditor 
+              key={noteId} // Use noteId as key to force complete re-render when switching notes
+              markdown={editorMarkdown} // Pass combined markdown
+              onChange={handleEditorChange} // Pass the content change handler
+              onTitleChange={handleTitleChange} // Pass the title change handler
+            />
+          ) : null}
         </div>
       </ScrollArea>
     </div>
