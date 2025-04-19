@@ -1,6 +1,7 @@
 import * as path from "@tauri-apps/api/path";
 import * as fs from "@tauri-apps/plugin-fs";
 import { NoteMetadata, Note, StoragePaths } from "./types";
+import fm from "front-matter";
 
 /**
  * Ensures the notes directory exists within the base storage path
@@ -88,18 +89,15 @@ export async function createNoteFile(
   const id = generateNoteId(title);
   const fileName = `${id}.md`;
   
-  // Create the front matter
-  const frontMatter = `---
+  // Create the frontmatter content with YAML
+  const frontmatterContent = `---
 title: "${title}"
 createdAt: "${now}"
 updatedAt: "${now}"
 id: "${id}"
 ---
 
-`;
-
-  // Combine front matter and content
-  const fullContent = `${frontMatter}${content}`;
+${content}`;
   
   // Create the file path
   const filePath = await path.join(paths.notesPath, fileName);
@@ -107,7 +105,7 @@ id: "${id}"
   
   try {
     // Write the file
-    await fs.writeTextFile(filePath, fullContent);
+    await fs.writeTextFile(filePath, frontmatterContent);
     
     // Return the metadata
     return {
@@ -138,35 +136,16 @@ export async function readNoteFile(
     const filePath = await path.join(notesPath, fileName);
     const content = await fs.readTextFile(filePath);
     
-    // TODO: Use gray-matter to parse front matter
-    // For now, we'll use a simple regex approach
-    const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    // Use front-matter to parse frontmatter
+    const parsed = fm(content);
     
-    if (!frontMatterMatch) {
-      throw new Error(`Invalid note format: ${fileName}`);
-    }
-    
-    const [, frontMatter, bodyContent] = frontMatterMatch;
-    
-    // Parse front matter
-    const titleMatch = frontMatter.match(/title:\s*"([^"]*)"/);
-    const createdAtMatch = frontMatter.match(/createdAt:\s*"([^"]*)"/);
-    const updatedAtMatch = frontMatter.match(/updatedAt:\s*"([^"]*)"/);
-    const idMatch = frontMatter.match(/id:\s*"([^"]*)"/);
-    const tagsMatch = frontMatter.match(/tags:\s*\[(.*)\]/);
-    
-    const title = titleMatch ? titleMatch[1] : "Untitled";
-    const createdAt = createdAtMatch ? createdAtMatch[1] : new Date().toISOString();
-    const updatedAt = updatedAtMatch ? updatedAtMatch[1] : createdAt;
-    const id = idMatch ? idMatch[1] : fileName.replace(/\.md$/, "");
-    
-    let tags: string[] = [];
-    if (tagsMatch && tagsMatch[1]) {
-      tags = tagsMatch[1]
-        .split(",")
-        .map((tag: string) => tag.trim().replace(/^"(.*)"$/, "$1"))
-        .filter(Boolean);
-    }
+    // Extract metadata from frontmatter
+    const attributes = parsed.attributes as Record<string, any>;
+    const title = attributes.title || "Untitled";
+    const createdAt = attributes.createdAt || new Date().toISOString();
+    const updatedAt = attributes.updatedAt || createdAt;
+    const id = attributes.id || fileName.replace(/\.md$/, "");
+    const tags = Array.isArray(attributes.tags) ? attributes.tags : [];
     
     return {
       id,
@@ -177,7 +156,7 @@ export async function readNoteFile(
       relativePath: fileName,
       filePath,
       content,
-      bodyContent: bodyContent.trim(),
+      bodyContent: parsed.body.trim(),
     };
   } catch (error) {
     console.error(`Error reading note file ${fileName}:`, error);
@@ -226,22 +205,24 @@ export async function updateNoteFile(
       updatedContent = content.replace(/^# .*?(\n|$)/, '').trim();
     }
     
-    // Create updated front matter
-    const frontMatter = `---
+    // Create frontmatter content with YAML
+    let tagsString = '';
+    if (note.tags && note.tags.length > 0) {
+      tagsString = `tags: [${note.tags.map(tag => `"${tag}"`).join(', ')}]\n`;
+    }
+    
+    // Generate the file content with frontmatter
+    const fileContent = `---
 title: "${updatedTitle}"
 createdAt: "${note.createdAt}"
 updatedAt: "${now}"
 id: "${note.id}"
-${note.tags && note.tags.length > 0 ? `tags: [${note.tags.map(tag => `"${tag}"`).join(", ")}]` : ""}
----
+${tagsString}---
 
-`;
-
-    // Combine front matter and content
-    const fullContent = `${frontMatter}${updatedContent}`;
+${updatedContent}`;
     
     // Write the updated file
-    await fs.writeTextFile(note.filePath, fullContent);
+    await fs.writeTextFile(note.filePath, fileContent);
     
     // Return the updated metadata
     return {
