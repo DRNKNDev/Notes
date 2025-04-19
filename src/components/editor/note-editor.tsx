@@ -56,6 +56,14 @@ export function NoteEditor({
   // Use a ref to track if we're currently handling an update to prevent circular updates
   const isUpdatingRef = useRef(false);
   
+  // Memoize the normalized markdown to prevent unnecessary re-renders
+  const safeMarkdown = useRef<string>('');
+  
+  // Only normalize markdown when it changes
+  if (safeMarkdown.current === '' || markdown !== null) {
+    safeMarkdown.current = normalizeMarkdown(markdown);
+  }
+  
   // Handle markdown changes with title extraction
   const handleMarkdownChange = (newMarkdown: string) => {
     // Prevent circular updates
@@ -79,9 +87,6 @@ export function NoteEditor({
       isUpdatingRef.current = false;
     }
   };
-
-  // Use the normalizeMarkdown function to ensure consistent formatting
-  const safeMarkdown = normalizeMarkdown(markdown);
   
   // Handle editor errors
   const handleError = (payload: { error: string; source: string }) => {
@@ -94,7 +99,7 @@ export function NoteEditor({
     <div className="flex flex-col w-full">
       <MDXEditor
       ref={editorRef}
-      markdown={safeMarkdown}
+      markdown={safeMarkdown.current}
       onChange={handleMarkdownChange}
       onError={handleError}
       plugins={

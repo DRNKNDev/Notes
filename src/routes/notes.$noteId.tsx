@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { NoteEditor } from "@/components/editor/note-editor";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { cn } from "@/lib/utils";
@@ -38,15 +38,28 @@ function NoteView() {
   // State for the current note title
   const [currentTitle, setCurrentTitle] = useState<string>('');
   
+  // Track if we've already loaded this note to prevent double loading
+  const loadedNoteIdRef = useRef<string | null>(null);
+  
   // Get fullscreen state
   const { isFullscreen } = useFullscreen();
   
   // Find the note with the matching ID
   const note = notes.find(note => note.id === noteId) as Note | undefined;
   
-  // Initialize editor markdown when noteId changes or note data loads
+  // Initialize editor markdown when noteId changes
   useEffect(() => {
+    // Skip if we've already loaded this note
+    if (loadedNoteIdRef.current === noteId) return;
+    
+    // Reset state when noteId changes
+    setEditorMarkdown(null);
+    setCurrentTitle('');
+    
     if (note) {
+      // Mark this note as loaded
+      loadedNoteIdRef.current = noteId;
+      
       // Construct initial editor markdown
       const initialTitle = note.title || 'Untitled';
       
@@ -69,7 +82,7 @@ function NoteView() {
       
       setCurrentTitle(initialTitle);
     }
-  }, [noteId, note]); // Depend on noteId and the note object itself
+  }, [noteId, note]); // Include note to ensure we have the latest data
 
   // Handle error states
   if (error) {
@@ -131,7 +144,14 @@ function NoteView() {
       const noteContent = editorMarkdown;
       
       // Save the note - pass the noteId, content, and title separately
-      await saveNote(note.id, noteContent, currentTitle);
+      const updatedNote = await saveNote(note.id, noteContent, currentTitle);
+      
+      // Check if the note ID has changed (due to title change)
+      if (updatedNote.id !== note.id) {
+        // Navigate to the new note URL
+        navigate({ to: '/notes/$noteId', params: { noteId: updatedNote.id } });
+      }
+      
       toast.success("Note saved successfully", {
         description: "Your changes have been saved to disk"
       });
@@ -216,9 +236,9 @@ function NoteView() {
           "min-h-full",
           isFullscreen ? "p-40 pt-20" : "px-6 pb-20"
         )}>
-          {editorMarkdown !== null ? (
+          {editorMarkdown !== null && note && loadedNoteIdRef.current === noteId ? (
             <NoteEditor 
-              key={noteId} // Use noteId as key to force complete re-render when switching notes
+              key={`note-${noteId}`} // Use prefixed noteId as key to force complete re-render when switching notes
               markdown={editorMarkdown} // Pass combined markdown
               onChange={handleEditorChange} // Pass the content change handler
               onTitleChange={handleTitleChange} // Pass the title change handler
