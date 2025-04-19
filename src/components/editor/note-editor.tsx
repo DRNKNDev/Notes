@@ -134,6 +134,7 @@ export function NoteEditor({
       markdown={safeMarkdown.current}
       onChange={handleMarkdownChange}
       onError={handleError}
+      autoFocus
       plugins={
         [
           headingsPlugin(),
