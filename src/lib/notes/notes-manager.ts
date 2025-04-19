@@ -168,13 +168,15 @@ export async function readNoteFile(
  * Updates an existing note file
  * @param paths Storage paths
  * @param noteId ID of the note to update
- * @param content New content (with or without front matter)
+ * @param newTitle The new title for the note
+ * @param bodyContent The new body content for the note (without title or frontmatter)
  * @returns The updated note with full content
  */
 export async function updateNoteFile(
   paths: StoragePaths,
   noteId: string,
-  content: string
+  newTitle: string,
+  bodyContent: string
 ): Promise<Note> {
   try {
     // Find the note file by ID
@@ -193,19 +195,11 @@ export async function updateNoteFile(
     // Update the note
     const now = new Date().toISOString();
     
-    // Extract title from content if it starts with an H1
-    let updatedTitle = note.title;
-    let updatedContent = content;
+    // Directly use the provided title and body content
+    const updatedTitle = newTitle.trim() || 'Untitled';
+    const updatedContent = bodyContent.trim();
     
-    // Check if content starts with an H1 header
-    const titleMatch = content.match(/^# (.*?)(\n|$)/);
-    if (titleMatch) {
-      updatedTitle = titleMatch[1].trim();
-      // Remove the H1 line from content if we extracted a title
-      updatedContent = content.replace(/^# .*?(\n|$)/, '').trim();
-    }
-    
-    // Check if title has changed
+    // Check if title has changed (compare with original note title)
     const titleChanged = updatedTitle !== note.title;
     
     // Generate a new ID if the title has changed

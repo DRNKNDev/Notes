@@ -16,6 +16,7 @@ import {
   searchNotes,
   updateSearchIndex,
 } from "../search/lunr-search";
+import { parseMarkdownWithTitle } from "@/hooks/use-markdown-title";
 
 interface NotesState {
   // Storage paths
@@ -260,32 +261,19 @@ export const useNotesStore = create<NotesState>()(
             notesPath,
             indexPath,
           };
-          
-          // Prepare the content to be saved
-          let finalContent = content;
-          if (title) {
-            // Extract body (everything after the first H1 or the whole content if no H1)
-            const lines = content.split('\n');
-            const firstH1Index = lines.findIndex(line => line.trim().startsWith('# '));
-            let body = '';
-            if (firstH1Index !== -1) {
-              // Skip the H1 line and the first blank line after it, if exists
-              let startIndex = firstH1Index + 1;
-              if (lines[startIndex] && lines[startIndex].trim() === '') {
-                startIndex++;
-              }
-              body = lines.slice(startIndex).join('\n');
-            } else {
-              // No H1 found, use the whole content as body
-              body = content;
-            }
-            
-            // Reconstruct with the new title
-            finalContent = `# ${title}\n\n${body.trimStart()}`;
-          }
-          
-          // Update the note file with the reconstructed content
-          const updatedNote = await updateNoteFile(paths, noteId, finalContent);
+
+          // Determine the definitive title and parse body content
+          const definitiveTitle = title?.trim() || 'Untitled'; // Use provided title or fallback
+          const parsedContent = parseMarkdownWithTitle(content, definitiveTitle);
+          const bodyContent = parsedContent.content; // Get content *after* H1
+
+          // Update the note file using the definitive title and extracted body content
+          const updatedNote = await updateNoteFile(
+            paths, 
+            noteId, 
+            definitiveTitle, // Pass definitive title
+            bodyContent      // Pass extracted body content
+          );
           
           // Update the notes array - handle the case where the ID might have changed
           const updatedNotes = notes.map((note) => {
