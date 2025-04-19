@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 import { useNotesStore } from "@/lib/notes/notes-store";
 import { Note } from "@/lib/notes/types";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save, Trash } from "lucide-react";
+import { Loader2, Trash } from "lucide-react";
 import { toast } from "sonner";
+
 // This route handles displaying a specific note by its ID
 export const Route = createFileRoute('/notes/$noteId')({  
   component: NoteView
@@ -40,6 +41,8 @@ function NoteView() {
   
   // Track if we've already loaded this note to prevent double loading
   const loadedNoteIdRef = useRef<string | null>(null);
+  // Ref to track if the initial load is complete to prevent auto-save on mount
+  const isInitialLoadCompleteRef = useRef(false);
   
   // Get fullscreen state
   const { isFullscreen } = useFullscreen();
@@ -51,6 +54,9 @@ function NoteView() {
   useEffect(() => {
     // Skip if we've already loaded this note
     if (loadedNoteIdRef.current === noteId) return;
+    
+    // Reset initial load flag
+    isInitialLoadCompleteRef.current = false;
     
     // Reset state when noteId changes
     setEditorMarkdown(null);
@@ -83,6 +89,31 @@ function NoteView() {
       setCurrentTitle(initialTitle);
     }
   }, [noteId, note]); // Include note to ensure we have the latest data
+
+  // Auto-save effect
+  useEffect(() => {
+    // Don't save if the initial load isn't complete or if content is null
+    if (!isInitialLoadCompleteRef.current || editorMarkdown === null) {
+      // If the markdown is loaded, mark initial load as complete
+      if (editorMarkdown !== null) {
+        isInitialLoadCompleteRef.current = true;
+      }
+      return;
+    }
+    
+    // Don't save if we are already saving
+    if (isSaving) return;
+    
+    // Set up the debounced save
+    const handler = setTimeout(() => {
+      handleSave();
+    }, 1000); // Save after 1 second of inactivity
+
+    // Cleanup function to clear the timeout if the effect runs again
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [editorMarkdown, currentTitle]); // Re-run effect when content or title changes
 
   // Handle error states
   if (error) {
@@ -135,7 +166,7 @@ function NoteView() {
   
   // Save the current note
   const handleSave = async () => {
-    if (!note || editorMarkdown === null) return;
+    if (!note || editorMarkdown === null || !isInitialLoadCompleteRef.current || isSaving) return;
     
     try {
       setIsSaving(true);
@@ -190,24 +221,7 @@ function NoteView() {
       {/* Note actions toolbar */}
       <div className="border-b p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save
-              </>
-            )}
-          </Button>
+          {/* Save button removed */}
         </div>
         
         <Button
