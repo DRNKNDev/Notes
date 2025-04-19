@@ -93,7 +93,6 @@ export function NoteEditor({
     <div className="flex flex-col w-full">
       <MDXEditor
       ref={editorRef}
-      key={safeMarkdown.substring(0, 20)}
       markdown={safeMarkdown}
       onChange={handleMarkdownChange}
       onError={handleError}
