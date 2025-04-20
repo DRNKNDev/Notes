@@ -66,17 +66,7 @@ export function AppSidebar() {
   //   : undefined
     
   // Get notes from the store
-  const { notes, isLoading, searchResults, searchQuery, createNote, baseStoragePath } = useNotesStore()
-  
-  // Removed debugging logs to prevent potential re-renders
-  
-  // We don't need the notes state anymore since we're using data.notes directly
-  // and conditionally rendering based on the route
-
-  // Note: Keyboard shortcuts will be handled in a dedicated hook in Phase 3
-
-  // Note: The activeItem state and notification to parent have been removed
-  // as we now use Tanstack Router for navigation state
+  const { notes, isLoading, searchResults, searchQuery, createNote } = useNotesStore()
 
   // If in fullscreen mode, don't render the sidebar
   if (isFullscreen) {
