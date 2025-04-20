@@ -6,7 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import useTheme from "@/hooks/use-theme";
+import { Card, CardContent } from "@/components/ui/card";
+import { useThemeContext } from "@/components/theme-provider";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+
+// Import the themes list
+import themesList from "@/assets/themes.json";
 
 // This route serves as the settings page
 export const Route = createFileRoute('/settings')({  
@@ -20,19 +26,20 @@ export const Route = createFileRoute('/settings')({
   },
 });
 
-// Available themes
-const themes = [
-  { name: 'zinc', label: 'Zinc' },
-  { name: 'slate', label: 'Slate' },
-  { name: 'stone', label: 'Stone' },
-  { name: 'gray', label: 'Gray' },
-  { name: 'neutral', label: 'Neutral' },
-];
+// Type for theme options
+interface ThemeOption {
+  name: string;
+  url: string;
+  preview?: string; // Optional preview image URL
+}
 
 function SettingsPage() {
   // Get the current settings category from URL search params
   const { category } = Route.useSearch();
-  const { theme, setTheme, mode, setMode } = useTheme();
+  const { mode, setMode, setColorTheme, currentThemeUrl, colorTheme, isLoadingTheme } = useThemeContext();
+  
+  // State for available themes
+  const [availableThemes] = useState<ThemeOption[]>(themesList);
 
   return (
     <div className="h-full overflow-hidden">
@@ -171,19 +178,53 @@ function SettingsPage() {
                       <Label className="text-sm font-medium text-foreground mb-2 block">
                         Color Theme
                       </Label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                        {themes.map((themeOption) => (
-                          <Button
-                            key={themeOption.name}
-                            type="button"
-                            variant={theme === themeOption.name ? "default" : "outline"}
-                            className="h-auto flex flex-col items-center justify-center p-3 gap-2"
-                            onClick={() => setTheme(themeOption.name)}
-                          >
-                            <div className={`w-full h-12 rounded-md bg-primary`}></div>
-                            <span className="text-xs font-medium">{themeOption.label}</span>
-                          </Button>
-                        ))}
+                      
+                      {isLoadingTheme ? (
+                        <div className="flex items-center justify-center p-8">
+                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                          <span className="ml-2 text-sm text-muted-foreground">Loading theme...</span>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {availableThemes.map((themeOption) => (
+                            <Card 
+                              key={themeOption.url}
+                              className={`overflow-hidden cursor-pointer transition-all ${(themeOption.url === currentThemeUrl) || (themeOption.name.toLowerCase() === 'default' && !currentThemeUrl) ? 'ring-2 ring-primary' : 'hover:border-primary/50'}`}
+                              onClick={() => {
+                                if (themeOption.name.toLowerCase() === 'default') {
+                                  setColorTheme('default');
+                                } else {
+                                  setColorTheme(themeOption.name.toLowerCase(), themeOption.url);
+                                }
+                              }}
+                            >
+                              <CardContent className="p-0">
+                                <div className="p-4 flex items-center">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{themeOption.name}</span>
+                                    <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                      {themeOption.url.split('/').pop()?.replace('.json', '')}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex border-t">
+                                  <div className="w-1/2 h-10 bg-background flex items-center justify-center text-xs">
+                                    Light
+                                  </div>
+                                  <div className="w-1/2 h-10 bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
+                                    Dark
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="mt-4">
+                        <p className="text-xs text-muted-foreground">
+                          Current theme: {colorTheme?.name || 'Default'}
+                        </p>
                       </div>
                     </div>
                     
