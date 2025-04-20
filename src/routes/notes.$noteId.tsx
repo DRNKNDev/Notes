@@ -239,7 +239,7 @@ function NoteView() {
               <div className="flex items-center justify-between">
                 <p>Toggle Fullscreen</p>
                 {/* Using span for special characters */} 
-                <span className="text-xs text-muted-foreground ml-2 font-mono">⌃⌘F</span> 
+                <span className="text-xs text-muted ml-2 font-mono">⌃⌘F</span> 
               </div>
             </TooltipContent>
           </Tooltip>
@@ -282,7 +282,11 @@ function NoteView() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
-              <p>Delete Note</p>
+              <div className="flex items-center justify-between">
+                <p>Delete Note</p>
+                {/* Using span for special characters */} 
+                <span className="text-xs text-muted ml-2 font-mono">⌘⌫</span>
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
