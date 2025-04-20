@@ -65,9 +65,12 @@ export function AppSidebarSecondary({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
-                      variant="ghost" 
+                      variant={searchQuery ? "secondary" : "ghost"}
                       size="icon" 
-                      className="h-7 w-7" 
+                      className={cn(
+                        "h-7 w-7",
+                        searchQuery && "bg-accent text-accent-foreground"
+                      )}
                       aria-label="Search Notes"
                       onClick={() => {
                         if (setSearchOpen) {
@@ -116,8 +119,8 @@ export function AppSidebarSecondary({
                     // Show search results
                     searchResults.length > 0 ? (
                       searchResults.map((result) => {
-                        // Find the actual note from the notes array using the result ID
-                        const note = notes.find(n => n.id === result.id);
+                        // Find the actual note from the notes array using the result ref
+                        const note = notes.find(n => n.id === result.ref);
                         if (!note) return null;
                         return (
                           <Link
@@ -134,10 +137,10 @@ export function AppSidebarSecondary({
                                 </span>
                               </div>
                               <p className="line-clamp-2 text-xs text-muted-foreground">
-                                {/* Display note description as preview */}
-                                {note.description || (
-                                  <span className="italic">No description</span>
-                                )}
+                                {/* Display note content as preview */}
+                                {typeof note === 'object' && note !== null && 'bodyContent' in note ? 
+                                  String(note.bodyContent).substring(0, 100) + (String(note.bodyContent).length > 100 ? '...' : '') : 
+                                  (note.description || <span className="italic">No preview available</span>)}
                               </p>  
                               {/* Tags */}
                               {note.tags && note.tags.length > 0 && (
@@ -157,8 +160,9 @@ export function AppSidebarSecondary({
                         );
                       })
                     ) : (
-                      <div className="px-4 py-2 text-sm text-muted-foreground">
-                        No results found
+                      <div className="p-3 text-sm text-muted-foreground">
+                        <p className="mb-2">No results found for "{searchQuery}"</p>
+                        <p className="text-xs">Try different keywords or check your spelling</p>
                       </div>
                     )
                   ) : isLoading ? (
