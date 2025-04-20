@@ -12,6 +12,9 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useNotesStore } from '@/lib/notes/notes-store';
 import { toast } from 'sonner';
 
+// Import sample note content
+import sampleNotePath from '@/assets/sample-note.md?url';
+
 // Import themes list
 import themesList from '@/assets/themes.json';
 
@@ -31,6 +34,7 @@ function OnboardingPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { setMode, mode, setColorTheme } = useThemeContext();
   const navigate = useNavigate();
+  const { createNote } = useNotesStore();
   
 
   
@@ -119,6 +123,26 @@ function OnboardingPage() {
     }
   };
 
+  // Function to create a default welcome note
+  const createWelcomeNote = async () => {
+    try {
+      // Fetch the sample note content
+      const response = await fetch(sampleNotePath);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sample note: ${response.statusText}`);
+      }
+      
+      const sampleNoteContent = await response.text();
+      
+      // Create the welcome note using the sample content
+      await createNote("Welcome to DRNKN Notes!", sampleNoteContent);
+      console.log('Welcome note created successfully');
+    } catch (error) {
+      console.error('Error creating welcome note:', error);
+      // Don't throw here - we want onboarding to continue even if note creation fails
+    }
+  };
+
   // Handle completing onboarding
   const handleComplete = async () => {
     if (!directoryPath) {
@@ -134,6 +158,9 @@ function OnboardingPage() {
       
       // Initialize the notes store with the selected directory
       await setBaseStoragePath(directoryPath);
+      
+      // Create the welcome note after storage is initialized
+      await createWelcomeNote();
       
       // Show success message
       toast.success('Setup complete! Your notes will be stored in the selected directory.');
