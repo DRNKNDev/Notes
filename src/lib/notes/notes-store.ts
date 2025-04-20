@@ -253,7 +253,7 @@ export const useNotesStore = create<NotesState>()(
         }
         
         try {
-          set({ isLoading: true, error: null });
+          set({ error: null }); // Clear previous errors
           
           // Create the storage paths object
           const paths: StoragePaths = {
@@ -300,7 +300,6 @@ export const useNotesStore = create<NotesState>()(
             notes: updatedNotes as Note[],
             searchIndex: updatedIndex,
             activeNoteContent: updatedNote.content,
-            isLoading: false,
           };
           
           // If the ID has changed, update the activeNoteId
@@ -314,7 +313,6 @@ export const useNotesStore = create<NotesState>()(
         } catch (error) {
           console.error(`Error saving note ${noteId}:`, error);
           set({
-            isLoading: false,
             error: `Failed to save note: ${error}`,
           });
           throw error;

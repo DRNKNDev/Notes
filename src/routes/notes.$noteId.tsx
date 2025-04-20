@@ -175,13 +175,7 @@ function NoteView() {
       const noteContent = editorMarkdown;
       
       // Save the note - pass the noteId, content, and title separately
-      const updatedNote = await saveNote(note.id, noteContent, currentTitle);
-      
-      // Check if the note ID has changed (due to title change)
-      if (updatedNote.id !== note.id) {
-        // Navigate to the new note URL
-        navigate({ to: '/notes/$noteId', params: { noteId: updatedNote.id } });
-      }
+      await saveNote(note.id, noteContent, currentTitle);
       
       toast.success("Note saved successfully", {
         description: "Your changes have been saved to disk"
@@ -252,7 +246,6 @@ function NoteView() {
         )}>
           {editorMarkdown !== null && note && loadedNoteIdRef.current === noteId ? (
             <NoteEditor 
-              key={`note-${noteId}`} // Use prefixed noteId as key to force complete re-render when switching notes
               markdown={editorMarkdown} // Pass combined markdown
               onChange={handleEditorChange} // Pass the content change handler
               onTitleChange={handleTitleChange} // Pass the title change handler
