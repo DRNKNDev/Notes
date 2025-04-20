@@ -175,7 +175,16 @@ function NoteView() {
       const noteContent = editorMarkdown;
       
       // Save the note - pass the noteId, content, and title separately
-      await saveNote(note.id, noteContent, currentTitle);
+      const updatedNote = await saveNote(note.id, noteContent, currentTitle);
+      
+      // If the ID changed due to title update, navigate to the new URL smoothly
+      if (updatedNote.id !== note.id) {
+        navigate({
+          to: '/notes/$noteId',
+          params: { noteId: updatedNote.id }, 
+          replace: true, 
+        });
+      }
       
       toast.success("Note saved successfully", {
         description: "Your changes have been saved to disk"
