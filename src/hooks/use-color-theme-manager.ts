@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import defaultTheme from '@/assets/default-theme.json';
 
 // Define the structure of the theme object based on the Shadcn theme format
@@ -28,6 +28,9 @@ const applyThemeVariables = (theme: ColorTheme) => {
   const lightColors = theme.cssVars.light;
   const darkColors = theme.cssVars.dark;
   const commonColors = theme.cssVars.theme || {};
+  
+  // Check if dark mode is currently active
+  const isDarkMode = root.classList.contains('dark');
 
   // Apply common theme variables to :root
   for (const [key, value] of Object.entries(commonColors)) {
@@ -37,15 +40,26 @@ const applyThemeVariables = (theme: ColorTheme) => {
     }
   }
 
-  // Apply light theme variables directly to :root, skipping protected ones
-  for (const [key, value] of Object.entries(lightColors)) {
-    const cssVar = `--${key}`;
-    if (!PROTECTED_VARIABLES.has(cssVar)) {
-      root.style.setProperty(cssVar, value);
+  // Apply the appropriate theme variables based on current mode
+  if (isDarkMode) {
+    // Apply dark theme variables directly to :root when in dark mode
+    for (const [key, value] of Object.entries(darkColors)) {
+      const cssVar = `--${key}`;
+      if (!PROTECTED_VARIABLES.has(cssVar)) {
+        root.style.setProperty(cssVar, value);
+      }
+    }
+  } else {
+    // Apply light theme variables when in light mode
+    for (const [key, value] of Object.entries(lightColors)) {
+      const cssVar = `--${key}`;
+      if (!PROTECTED_VARIABLES.has(cssVar)) {
+        root.style.setProperty(cssVar, value);
+      }
     }
   }
 
-  // Apply dark theme variables under the .dark selector, skipping protected ones
+  // Still create the style sheet for future dark mode toggling
   let darkStyleSheet = document.getElementById('dark-theme-styles');
   if (!darkStyleSheet) {
     darkStyleSheet = document.createElement('style');
@@ -73,7 +87,7 @@ const applyThemeVariables = (theme: ColorTheme) => {
   darkStyles += '}';
   darkStyleSheet.textContent = darkStyles;
 
-  console.log(`Applied theme: ${theme.name}`);
+  console.log(`Applied theme: ${theme.name} (Dark mode: ${isDarkMode})`);
 };
 
 // Custom hook for managing color themes
@@ -81,6 +95,8 @@ export const useColorThemeManager = () => {
   const [currentTheme, setCurrentTheme] = useState<ColorTheme | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // Track if we're currently applying a theme to prevent loops
+  const isApplyingThemeRef = useRef(false);
   const [themeKey, setThemeKey] = useState<string>(() => {
     // Load saved theme key from local storage or use the default
     return localStorage.getItem('colorThemeKey') || DEFAULT_THEME_KEY;
@@ -93,6 +109,13 @@ export const useColorThemeManager = () => {
 
   // Function to load and apply a theme
   const loadTheme = useCallback(async (key: string, url?: string | null) => {
+    // Prevent infinite loops if we're already applying a theme
+    if (isApplyingThemeRef.current) {
+      console.log('Already applying theme, skipping loadTheme call');
+      return;
+    }
+    
+    isApplyingThemeRef.current = true;
     setIsLoading(true);
     setError(null);
     
@@ -131,6 +154,7 @@ export const useColorThemeManager = () => {
       } else {
         localStorage.removeItem('colorThemeUrl');
       }
+      setThemeKey(key);
     } catch (err) {
       console.error('Error loading theme:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -140,6 +164,10 @@ export const useColorThemeManager = () => {
       // setThemeUrl(DEFAULT_THEME_URL); // Revert to default? Needs careful thought.
     } finally {
       setIsLoading(false);
+      // Reset the flag after a short delay to ensure all state updates have completed
+      setTimeout(() => {
+        isApplyingThemeRef.current = false;
+      }, 100);
     }
   }, []);
 
