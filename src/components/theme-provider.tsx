@@ -1,10 +1,21 @@
 import React, { createContext, useContext } from 'react';
-import useTheme, { Theme, EffectiveTheme } from '../hooks/use-theme'; // Adjust path if needed
+import useTheme, { Theme, EffectiveTheme } from '../hooks/use-theme';
 
 type ThemeContextType = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  // Light/dark mode
+  theme: Theme; // For backward compatibility
+  setTheme: (theme: Theme) => void; // For backward compatibility
+  mode: Theme;
+  setMode: (mode: Theme) => void;
   effectiveTheme: EffectiveTheme;
+  
+  // Color theme
+  colorTheme: any | null;
+  isLoadingTheme: boolean;
+  themeError: string | null;
+  setColorTheme: (key: string, url?: string | null) => void;
+  currentThemeKey: string;
+  currentThemeUrl: string | null;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
