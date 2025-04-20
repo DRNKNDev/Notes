@@ -3,7 +3,7 @@ import { Children, useCallback, useEffect, useRef, useState } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 const useAutoScroll = (
-  containerRef: React.RefObject<HTMLDivElement | null>,
+  containerRef: React.RefObject<HTMLDivElement>,
   enabled: boolean
 ) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true)
@@ -148,8 +148,8 @@ export type ChatContainerProps = {
   children: React.ReactNode
   className?: string
   autoScroll?: boolean
-  scrollToRef?: React.RefObject<HTMLDivElement | null>
-  ref?: React.RefObject<HTMLDivElement | null>
+  scrollToRef?: React.RefObject<HTMLDivElement>
+  ref?: React.RefObject<HTMLDivElement>
 } & React.HTMLAttributes<HTMLDivElement>
 
 function ChatContainer({
@@ -164,7 +164,7 @@ function ChatContainer({
   const localBottomRef = useRef<HTMLDivElement>(null)
   const bottomRef = scrollToRef || localBottomRef
   // Ensure we have a properly typed ref that can be passed to a div element
-  const chatContainerRef = (ref || containerRef) as React.RefObject<HTMLDivElement>
+  const chatContainerRef = (ref || containerRef)
   const prevChildrenRef = useRef<React.ReactNode>(null)
   const contentChangedWithoutNewMessageRef = useRef(false)
 

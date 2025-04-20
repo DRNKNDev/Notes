@@ -19,7 +19,6 @@ interface MessageType {
 
 function PromptPage() {
   const [prompt, setPrompt] = useState("");
-  const [isChatMode, setIsChatMode] = useState(true);
   const [messages, setMessages] = useState<MessageType[]>([
     {
       role: "assistant" as const,

@@ -1,5 +1,5 @@
 import * as fs from "@tauri-apps/plugin-fs";
-import { Note, NoteMetadata, SearchResult, StoragePaths } from "../notes/types";
+import { Note, SearchResult, StoragePaths } from "../notes/types";
 
 // We'll use dynamic imports for lunr since it's a third-party library
 // This allows us to handle the case where the package isn't installed yet
@@ -131,7 +131,7 @@ export async function searchNotes(
 export async function updateSearchIndex(
   paths: StoragePaths,
   notes: Note[],
-  index: LunrIndex | null,
+  _index: LunrIndex | null,
   _operation: "add" | "update" | "delete",
   _noteId: string
 ): Promise<LunrIndex> {

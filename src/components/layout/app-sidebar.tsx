@@ -1,4 +1,4 @@
-import { BookText, Command, PenLine, Plus, Search, Sliders, Palette } from "lucide-react"
+import { BookText, Command, Plus, Search, Sliders, Palette } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
 import { useFullscreen } from "@/hooks/use-fullscreen"
 import { useNotesStore } from "@/lib/notes/notes-store"
