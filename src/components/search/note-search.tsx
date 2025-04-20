@@ -125,7 +125,7 @@ export function NoteSearch({ open, onOpenChange }: NoteSearchProps) {
   }
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog open={open} onOpenChange={onOpenChange} hideCloseButton>
       <Command filter={customFilter}>
       <div className="relative">
         <CommandInput 
