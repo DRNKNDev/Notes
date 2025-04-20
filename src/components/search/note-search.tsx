@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
 import { useNotesStore } from '@/lib/notes/notes-store'
 import { Note, NoteMetadata } from '@/lib/notes/types'
-import { Search, FileText, Loader2 } from 'lucide-react'
+import { FileText, Loader2 } from 'lucide-react'
 
 interface NoteSearchProps {
   open: boolean
@@ -135,10 +135,8 @@ export function NoteSearch({ open, onOpenChange }: NoteSearchProps) {
           className="pr-8"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          {isLoading ? (
+          {isLoading && (
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-          ) : (
-            <Search className="h-4 w-4 text-muted-foreground" />
           )}
         </div>
       </div>
