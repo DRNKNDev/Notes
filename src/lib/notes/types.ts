@@ -16,6 +16,8 @@ export interface NoteMetadata {
   updatedAt: string;
   /** Optional tags array */
   tags?: string[];
+  /** Brief description/preview of the note content */
+  description?: string;
   /** Relative file path within the notes directory */
   relativePath: string;
   /** Full file path to the note */

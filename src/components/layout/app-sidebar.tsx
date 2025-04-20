@@ -301,8 +301,10 @@ export function AppSidebar() {
                             </span>
                           </div>
                           <p className="line-clamp-2 text-xs text-muted-foreground">
-                            {/* Display a preview of the note content */}
-                            {note.title}
+                            {/* Display note description as preview */}
+                            {note.description || (
+                              <span className="italic">No description</span>
+                            )}
                           </p>
                           {/* Tags */}
                           {note.tags && note.tags.length > 0 && (

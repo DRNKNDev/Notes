@@ -4,6 +4,38 @@ import { NoteMetadata, Note, StoragePaths } from "./types";
 import fm from "front-matter";
 
 /**
+ * Generates a description from note content
+ * @param content The note content (body content without frontmatter)
+ * @param maxLength Maximum length of the description
+ * @returns A truncated description
+ */
+function generateDescription(content: string, maxLength: number = 150): string {
+  // Remove markdown formatting for cleaner preview
+  const cleanContent = content
+    .replace(/\s+/g, ' ')                // Normalize whitespace
+    .replace(/#+\s/g, '')               // Remove headings
+    .replace(/\*\*|__|~~|\*|_|`/g, '')   // Remove bold, italic, strikethrough, code
+    .replace(/!?\[([^\]]*)\]\([^\)]*\)/g, '$1') // Replace links/images with just text
+    .replace(/\n+/g, ' ')               // Replace newlines with spaces
+    .trim();
+  
+  // Truncate to maxLength
+  if (cleanContent.length <= maxLength) {
+    return cleanContent;
+  }
+  
+  // Find a good breaking point (end of word)
+  const truncated = cleanContent.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  
+  if (lastSpace > maxLength * 0.8) { // Only break at word if we're not losing too much text
+    return truncated.substring(0, lastSpace) + '...';
+  }
+  
+  return truncated + '...';
+}
+
+/**
  * Ensures the notes directory exists within the base storage path
  * @param baseStoragePath The base storage directory path
  * @returns The derived storage paths object
@@ -89,12 +121,16 @@ export async function createNoteFile(
   const id = generateNoteId(title);
   const fileName = `${id}.md`;
   
+  // Generate description from content
+  const description = generateDescription(content);
+  
   // Create the frontmatter content with YAML
   const frontmatterContent = `---
 title: "${title}"
 createdAt: "${now}"
 updatedAt: "${now}"
 id: "${id}"
+description: "${description.replace(/"/g, '\"')}"
 ---
 
 ${content}`;
@@ -113,6 +149,7 @@ ${content}`;
       title,
       createdAt: now,
       updatedAt: now,
+      description,
       relativePath,
       filePath,
     };
@@ -147,12 +184,19 @@ export async function readNoteFile(
     const id = attributes.id || fileName.replace(/\.md$/, "");
     const tags = Array.isArray(attributes.tags) ? attributes.tags : [];
     
+    // Get description or generate from content
+    let description = attributes.description;
+    if (!description) {
+      description = generateDescription(parsed.body);
+    }
+    
     return {
       id,
       title,
       createdAt,
       updatedAt,
       tags,
+      description,
       relativePath: fileName,
       filePath,
       content,
@@ -211,12 +255,16 @@ export async function updateNoteFile(
       tagsString = `tags: [${note.tags.map(tag => `"${tag}"`).join(', ')}]\n`;
     }
     
+    // Generate a new description from the updated content
+    const updatedDescription = generateDescription(updatedContent);
+    
     // Generate the file content with frontmatter
     const fileContent = `---
 title: "${updatedTitle}"
 createdAt: "${note.createdAt}"
 updatedAt: "${now}"
 id: "${updatedId}"
+description: "${updatedDescription.replace(/"/g, '\"')}"
 ${tagsString}---
 
 ${updatedContent}`;
@@ -252,6 +300,7 @@ ${updatedContent}`;
       id: updatedId,
       title: updatedTitle,
       updatedAt: now,
+      description: updatedDescription,
       relativePath: newRelativePath,
       filePath: newFilePath,
       content: fileContent,
