@@ -26,7 +26,6 @@ function OnboardingPage() {
   const [directoryPath, setDirectoryPath] = useState<string>('');
   const [directoryName, setDirectoryName] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<string>('zinc');
-  const [username, setUsername] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const { setTheme, effectiveTheme } = useThemeContext();
   const navigate = useNavigate();
@@ -52,11 +51,7 @@ function OnboardingPage() {
       }).catch(console.error);
     }
     
-    // Get username from localStorage if it exists
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
+    // No need to load username anymore
   }, [baseStoragePath]);
 
   // Handle errors from the notes store
@@ -122,10 +117,8 @@ function OnboardingPage() {
     try {
       setIsProcessing(true);
       
-      // Save username to localStorage
-      if (username.trim()) {
-        localStorage.setItem('username', username.trim());
-      }
+      // Set onboarding completion flag
+      localStorage.setItem('isOnboardingComplete', 'true');
       
       // Initialize the notes store with the selected directory
       await setBaseStoragePath(directoryPath);
