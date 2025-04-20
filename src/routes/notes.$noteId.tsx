@@ -284,8 +284,6 @@ function NoteView() {
             <TooltipContent side="top">
               <div className="flex items-center justify-between">
                 <p>Delete Note</p>
-                {/* Using span for special characters */} 
-                <span className="text-xs text-muted ml-2 font-mono">⌘⌫</span>
               </div>
             </TooltipContent>
           </Tooltip>
