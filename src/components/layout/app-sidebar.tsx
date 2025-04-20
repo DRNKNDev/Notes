@@ -20,9 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-import { cn } from "@/lib/utils"
-
-
+import { cn, formatNoteDate } from "@/lib/utils"
 
 // Import the search component
 import { NoteSearch } from "@/components/search/note-search"
@@ -252,13 +250,15 @@ export function AppSidebar() {
                               <div className="flex items-center justify-between">
                                 <span className="font-medium truncate">{note.title}</span>
                                 <span className="text-xs text-muted-foreground">
-                                  {new Date(note.updatedAt || note.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                                  {formatNoteDate(note.updatedAt || note.createdAt)}
                                 </span>
                               </div>
                               <p className="line-clamp-2 text-xs text-muted-foreground">
-                                {/* Display a preview of the note content */}
-                                {note.title}
-                              </p>
+                                {/* Display note description as preview */}
+                                {note.description || (
+                                  <span className="italic">No description</span>
+                                )}
+                              </p>  
                               {/* Tags */}
                               {note.tags && note.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-1">
@@ -297,7 +297,7 @@ export function AppSidebar() {
                           <div className="flex items-center justify-between">
                             <span className="font-medium truncate">{note.title}</span>
                             <span className="text-xs text-muted-foreground">
-                              {new Date(note.updatedAt || note.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                              {formatNoteDate(note.updatedAt || note.createdAt)}
                             </span>
                           </div>
                           <p className="line-clamp-2 text-xs text-muted-foreground">
