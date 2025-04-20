@@ -33,8 +33,8 @@ function NoteView() {
   const [isDeleting, setIsDeleting] = useState(false);
   
   // State for the combined markdown content in the editor
-  // Initialize with null to indicate content is not yet loaded
-  const [editorMarkdown, setEditorMarkdown] = useState<string | null>(null);
+  // Initialize with empty string to prevent unmount on ID change
+  const [editorMarkdown, setEditorMarkdown] = useState<string>('');
   
   // State for the current note title
   const [currentTitle, setCurrentTitle] = useState<string>('');
@@ -58,8 +58,7 @@ function NoteView() {
     // Reset initial load flag
     isInitialLoadCompleteRef.current = false;
     
-    // Reset state when noteId changes
-    setEditorMarkdown(null);
+    // Reset state when noteId changes - KEEP editorMarkdown to prevent unmount
     setCurrentTitle('');
     
     if (note) {
@@ -253,7 +252,8 @@ function NoteView() {
           "min-h-full",
           isFullscreen ? "p-40 pt-20" : "px-6 pb-20"
         )}>
-          {editorMarkdown !== null && note && loadedNoteIdRef.current === noteId ? (
+          {/* Keep editor mounted if note exists and is loaded, even if markdown is temporarily empty during transition */}
+          {note && loadedNoteIdRef.current === noteId ? (
             <NoteEditor 
               markdown={editorMarkdown} // Pass combined markdown
               onChange={handleEditorChange} // Pass the content change handler
