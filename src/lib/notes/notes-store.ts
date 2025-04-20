@@ -118,10 +118,15 @@ export const useNotesStore = create<NotesState>()(
           // Read each note file
           const notesPromises = noteFiles.map(async (file) => {
             if (!file.name) {
-              console.log('File has no name:', file);
               return null;
             }
-            return await readNoteFile(notesPath, file.name);
+            try {
+              const note = await readNoteFile(notesPath, file.name);
+              return note;
+            } catch (err) {
+              console.error(`Error reading note file ${file.name}:`, err);
+              return null;
+            }
           });
           
           const notesWithNulls = await Promise.all(notesPromises);
@@ -132,13 +137,30 @@ export const useNotesStore = create<NotesState>()(
             return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
           });
           
-          // Try to load the search index
+          // Ensure notes have bodyContent for search
+          const notesWithContent = notes.map(note => {
+            // If bodyContent is undefined or null, set it to an empty string
+            if (!note.bodyContent) {
+              console.warn(`Note ${note.id} has no bodyContent, using empty string`);
+              return {
+                ...note,
+                bodyContent: ''
+              };
+            }
+            return note;
+          });
+          
+          // Try to load the existing search index
           let searchIndex = await loadSearchIndex(indexPath);
           
-          // If no index exists, create one
-          if (!searchIndex && notes.length > 0) {
-            searchIndex = await createSearchIndex(notes);
-            await saveSearchIndex(searchIndex, indexPath);
+          // If no index exists, create a new one
+          if (!searchIndex) {
+            searchIndex = await createSearchIndex(notesWithContent);
+            if (searchIndex) {
+              await saveSearchIndex(searchIndex, indexPath);
+            } else {
+              console.warn('Failed to create search index');
+            }
           }
           
           // Update state
@@ -146,6 +168,7 @@ export const useNotesStore = create<NotesState>()(
             notes,
             searchIndex,
             isLoading: false,
+            isInitialized: true,
           });
         } catch (error) {
           console.error("Error loading notes and index:", error);
@@ -389,6 +412,15 @@ export const useNotesStore = create<NotesState>()(
       // Search notes
       searchNotes: async (query: string) => {
         const { searchIndex } = get();
+        
+        // If query is empty, reset search state
+        if (!query.trim()) {
+          set({ 
+            searchQuery: '',
+            searchResults: [] 
+          });
+          return;
+        }
         
         if (!searchIndex) {
           set({ searchResults: [], searchQuery: query });
