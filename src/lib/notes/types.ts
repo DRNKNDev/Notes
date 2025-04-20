@@ -38,8 +38,8 @@ export interface Note extends NoteMetadata {
  * Search result from Lunr
  */
 export interface SearchResult {
-  /** The note ID that matched */
-  id: string;
+  /** The note ID that matched (reference field) */
+  ref: string;
   /** The search score (higher is better match) */
   score: number;
   /** The matched terms and their positions */

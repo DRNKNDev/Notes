@@ -13,6 +13,11 @@ type LunrBuilder = any;
  */
 export async function createSearchIndex(notes: Note[]): Promise<LunrIndex> {
   try {
+    // Return null if no notes
+    if (notes.length === 0) {
+      return null;
+    }
+    
     // Dynamically import lunr
     const lunr = await import("lunr");
     
@@ -21,8 +26,6 @@ export async function createSearchIndex(notes: Note[]): Promise<LunrIndex> {
       // Define the fields to index
       this.field("title", { boost: 10 }); // Title is more important, so boost it
       this.field("content");
-      
-      // Add a reference field (the note ID)
       this.ref("id");
       
       // Add each note to the index
@@ -57,7 +60,6 @@ export async function saveSearchIndex(
     
     // Write to the file
     await fs.writeTextFile(indexPath, serialized);
-    console.log(`Search index saved to: ${indexPath}`);
   } catch (error) {
     console.error("Error saving search index:", error);
     throw new Error(`Failed to save search index: ${error}`);
@@ -74,7 +76,6 @@ export async function loadSearchIndex(indexPath: string): Promise<LunrIndex | nu
     // Check if the index file exists
     const exists = await fs.exists(indexPath);
     if (!exists) {
-      console.log(`Search index not found at: ${indexPath}`);
       return null;
     }
     
@@ -85,7 +86,6 @@ export async function loadSearchIndex(indexPath: string): Promise<LunrIndex | nu
     const lunr = await import("lunr");
     const index = lunr.default.Index.load(JSON.parse(serialized));
     
-    console.log(`Search index loaded from: ${indexPath}`);
     return index;
   } catch (error) {
     console.error("Error loading search index:", error);
@@ -109,9 +109,70 @@ export async function searchNotes(
   }
   
   try {
-    // Perform the search
-    const results = index.search(query);
-    return results as SearchResult[];
+    // Clean up the query
+    const cleanQuery = query.trim();
+    
+    if (cleanQuery.length === 0) {
+      return [];
+    }
+    
+    // Check if the query already has special Lunr syntax
+    const hasLunrSyntax = /[\+\-\*\~\:]/g.test(cleanQuery);
+    
+    if (hasLunrSyntax) {
+      // If it has special syntax, use it as is
+      const results = index.search(cleanQuery) as SearchResult[];
+      return results;
+    }
+    
+    // Split the query into terms
+    const terms = cleanQuery.split(/\s+/);
+    
+    // Create a more flexible search query
+    let results: SearchResult[] = [];
+    
+    // First try an exact search with boosted title
+    try {
+      const exactQuery = terms.map(term => `title:${term}^10 ${term}`).join(' ');
+      results = index.search(exactQuery) as SearchResult[];
+    } catch (e) {
+      // Silently handle error and continue with next strategy
+    }
+    
+    // If no results, try with wildcards
+    if (results.length === 0) {
+      try {
+        const wildcardQuery = terms.map(term => `title:${term}*^10 ${term}*`).join(' ');
+        results = index.search(wildcardQuery) as SearchResult[];
+      } catch (e) {
+        // Silently handle error and continue with next strategy
+      }
+    }
+    
+    // If still no results, try fuzzy search
+    if (results.length === 0) {
+      try {
+        const fuzzyQuery = terms.map(term => `title:${term}~2^10 ${term}~2`).join(' ');
+        results = index.search(fuzzyQuery) as SearchResult[];
+      } catch (e) {
+        // Silently handle error and continue with next strategy
+      }
+    }
+    
+    // If we have results, return them
+    if (results.length > 0) {
+      return results;
+    }
+    
+    // Last resort: try a very permissive search
+    try {
+      // This will match any document containing any of the terms
+      const permissiveQuery = terms.join(' OR ');
+      const finalResults = index.search(permissiveQuery) as SearchResult[];
+      return finalResults;
+    } catch (e) {
+      return [];
+    }
   } catch (error) {
     console.error("Error searching notes:", error);
     // Return empty results on error
