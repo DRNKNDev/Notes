@@ -6,10 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 import { useThemeContext } from "@/components/theme-provider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeSelector, type ThemeOption } from "@/components/theme/theme-selector";
+import { useNotesStore } from "@/lib/notes/notes-store";
+
+// Import Tauri APIs
+import { open } from "@tauri-apps/plugin-dialog";
 
 // Import the themes list
 import themesList from "@/assets/themes.json";
@@ -33,15 +38,29 @@ function SettingsPage() {
   const { category } = Route.useSearch();
   const { mode, setMode, setColorTheme, currentThemeUrl, colorTheme } = useThemeContext();
   
+  // Get notes store state and actions
+  const { baseStoragePath, setBaseStoragePath, isLoading, error, clearError } = useNotesStore();
+  
+  // Local state for directory path input
+  const [directoryPath, setDirectoryPath] = useState<string>(baseStoragePath || "");
+  const [isSaving, setIsSaving] = useState(false);
+  
   // State for available themes
   const [availableThemes] = useState<ThemeOption[]>(themesList);
+  
+  // Update local state when baseStoragePath changes
+  useEffect(() => {
+    if (baseStoragePath) {
+      setDirectoryPath(baseStoragePath);
+    }
+  }, [baseStoragePath]);
 
   return (
     <div className="h-full overflow-hidden">
       <ScrollArea className="h-full">
         <div className="p-6 max-w-4xl mx-auto">
           {category === "general" && (
-            <form>
+            <form onSubmit={(e) => e.preventDefault()}>
               <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
                 <div>
                   <h2 className="font-semibold text-foreground">
@@ -67,14 +86,50 @@ function SettingsPage() {
                           name="notes-directory"
                           placeholder="/Users/username/Documents/Notes"
                           className="flex-1"
+                          value={directoryPath}
+                          onChange={(e) => setDirectoryPath(e.target.value)}
+                          disabled={isLoading}
                         />
-                        <Button variant="outline" type="button">
+                        <Button 
+                          variant="outline" 
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              // Open directory picker dialog
+                              const selected = await open({
+                                directory: true,
+                                multiple: false,
+                                title: "Select Notes Directory"
+                              });
+                              
+                              if (selected && !Array.isArray(selected)) {
+                                setDirectoryPath(selected);
+                              }
+                            } catch (err) {
+                              console.error("Error selecting directory:", err);
+                              toast.error("Failed to select directory");
+                            }
+                          }}
+                          disabled={isLoading}
+                        >
                           Browse
                         </Button>
                       </div>
                       <p className="mt-2 text-xs text-muted-foreground">
                         The directory where your markdown notes will be stored.
                       </p>
+                      {error && (
+                        <p className="mt-2 text-xs text-destructive">
+                          Error: {error}
+                          <Button 
+                            variant="link" 
+                            className="h-auto p-0 text-xs ml-1" 
+                            onClick={clearError}
+                          >
+                            Clear
+                          </Button>
+                        </p>
+                      )}
                     </div>
                     
                     <div className="col-span-full">
@@ -146,18 +201,49 @@ function SettingsPage() {
               <Separator className="my-8" />
               
               <div className="flex items-center justify-end space-x-4">
-                <Button type="button" variant="outline" className="whitespace-nowrap">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="whitespace-nowrap"
+                  onClick={() => {
+                    // Reset to default directory
+                    setDirectoryPath("");
+                  }}
+                  disabled={isLoading || isSaving}
+                >
                   Reset to Defaults
                 </Button>
-                <Button type="submit" className="whitespace-nowrap">
-                  Save Settings
+                <Button 
+                  type="button" 
+                  className="whitespace-nowrap"
+                  onClick={async () => {
+                    if (!directoryPath) {
+                      toast.error("Please select a notes directory");
+                      return;
+                    }
+                    
+                    try {
+                      setIsSaving(true);
+                      // Save the directory path to the store
+                      await setBaseStoragePath(directoryPath);
+                      toast.success("Notes directory updated successfully");
+                    } catch (err) {
+                      console.error("Error saving notes directory:", err);
+                      toast.error("Failed to update notes directory");
+                    } finally {
+                      setIsSaving(false);
+                    }
+                  }}
+                  disabled={isLoading || isSaving}
+                >
+                  {isSaving ? "Saving..." : "Save Settings"}
                 </Button>
               </div>
             </form>
           )}
           
           {category === "themes" && (
-            <form>
+            <form onSubmit={(e) => e.preventDefault()}>
               <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
                 <div>
                   <h2 className="font-semibold text-foreground">
@@ -234,11 +320,42 @@ function SettingsPage() {
               <Separator className="my-8" />
               
               <div className="flex items-center justify-end space-x-4">
-                <Button type="button" variant="outline" className="whitespace-nowrap">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="whitespace-nowrap"
+                  onClick={() => {
+                    // Reset to default directory
+                    setDirectoryPath("");
+                  }}
+                  disabled={isLoading || isSaving}
+                >
                   Reset to Defaults
                 </Button>
-                <Button type="submit" className="whitespace-nowrap">
-                  Save Settings
+                <Button 
+                  type="button" 
+                  className="whitespace-nowrap"
+                  onClick={async () => {
+                    if (!directoryPath) {
+                      toast.error("Please select a notes directory");
+                      return;
+                    }
+                    
+                    try {
+                      setIsSaving(true);
+                      // Save the directory path to the store
+                      await setBaseStoragePath(directoryPath);
+                      toast.success("Notes directory updated successfully");
+                    } catch (err) {
+                      console.error("Error saving notes directory:", err);
+                      toast.error("Failed to update notes directory");
+                    } finally {
+                      setIsSaving(false);
+                    }
+                  }}
+                  disabled={isLoading || isSaving}
+                >
+                  {isSaving ? "Saving..." : "Save Settings"}
                 </Button>
               </div>
             </form>
