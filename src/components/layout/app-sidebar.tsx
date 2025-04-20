@@ -1,6 +1,7 @@
 import { BookText, Command } from "lucide-react"
 import { Link, useRouterState } from "@tanstack/react-router"
 import { useFullscreen } from "@/hooks/use-fullscreen"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 import { SidebarActions } from "@/components/layout/sidebar-actions"
 import { AppSidebarSecondary } from "@/components/layout/app-sidebar-secondary"
@@ -27,6 +28,9 @@ export function AppSidebar() {
   
   // Get fullscreen state
   const { isFullscreen } = useFullscreen()
+  
+  // Check if we're on mobile
+  const isMobile = useIsMobile()
   
   // Get current router state to check route parameters
   const routerState = useRouterState()
@@ -66,13 +70,14 @@ export function AppSidebar() {
         collapsible="icon"
         className="overflow-hidden *:data-[sidebar=sidebar]:flex-row rounded-bl-lg"
       >
-        {/* This is the first sidebar */}
+        {/* This is the first sidebar - hide on mobile */}
         {/* We disable collapsible and adjust width to icon. */}
         {/* This will make the sidebar appear as icons. */}
-        <Sidebar
-          collapsible="none"
-          className="w-[calc(var(--sidebar-width-icon)+1px)]! border-r border-muted"
-        >
+        {!isMobile && (
+          <Sidebar
+            collapsible="none"
+            className="w-[calc(var(--sidebar-width-icon)+1px)]! border-r border-muted"
+          >
           <SidebarHeader>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -158,6 +163,7 @@ export function AppSidebar() {
             <SidebarActions />
           </SidebarFooter>
         </Sidebar>
+        )}
 
         {/* This is the second sidebar */}
         {/* Hide the secondary sidebar when Prompt or Journal is active */}
