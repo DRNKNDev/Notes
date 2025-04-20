@@ -328,7 +328,7 @@ export const useNotesStore = create<NotesState>()(
         }
         
         try {
-          set({ isLoading: true, error: null });
+          set({ error: null }); // Clear previous errors
           
           // Create the storage paths object
           const paths: StoragePaths = {
@@ -356,7 +356,6 @@ export const useNotesStore = create<NotesState>()(
           const newState: Partial<NotesState> = {
             notes: updatedNotes,
             searchIndex: updatedIndex,
-            isLoading: false,
           };
           
           // Clear active note if it was deleted
@@ -371,7 +370,6 @@ export const useNotesStore = create<NotesState>()(
         } catch (error) {
           console.error(`Error deleting note ${noteId}:`, error);
           set({
-            isLoading: false,
             error: `Failed to delete note: ${error}`,
           });
           throw error;
