@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { useThemeContext } from "@/components/theme-provider";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { ThemeSelector, type ThemeOption } from "@/components/theme/theme-selector";
 
 // Import the themes list
 import themesList from "@/assets/themes.json";
@@ -26,17 +26,12 @@ export const Route = createFileRoute('/settings')({
   },
 });
 
-// Type for theme options
-interface ThemeOption {
-  name: string;
-  url: string;
-  preview?: string; // Optional preview image URL
-}
+
 
 function SettingsPage() {
   // Get the current settings category from URL search params
   const { category } = Route.useSearch();
-  const { mode, setMode, setColorTheme, currentThemeUrl, colorTheme, isLoadingTheme } = useThemeContext();
+  const { mode, setMode, setColorTheme, currentThemeUrl, colorTheme } = useThemeContext();
   
   // State for available themes
   const [availableThemes] = useState<ThemeOption[]>(themesList);
@@ -179,47 +174,21 @@ function SettingsPage() {
                         Color Theme
                       </Label>
                       
-                      {isLoadingTheme ? (
-                        <div className="flex items-center justify-center p-8">
-                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                          <span className="ml-2 text-sm text-muted-foreground">Loading theme...</span>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {availableThemes.map((themeOption) => (
-                            <Card 
-                              key={themeOption.url}
-                              className={`overflow-hidden cursor-pointer transition-all ${(themeOption.url === currentThemeUrl) || (themeOption.name.toLowerCase() === 'default' && !currentThemeUrl) ? 'ring-2 ring-primary' : 'hover:border-primary/50'}`}
-                              onClick={() => {
-                                if (themeOption.name.toLowerCase() === 'default') {
-                                  setColorTheme('default');
-                                } else {
-                                  setColorTheme(themeOption.name.toLowerCase(), themeOption.url);
-                                }
-                              }}
-                            >
-                              <CardContent className="p-0">
-                                <div className="p-4 flex items-center">
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">{themeOption.name}</span>
-                                    <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                      {themeOption.url.split('/').pop()?.replace('.json', '')}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex border-t">
-                                  <div className="w-1/2 h-10 bg-background flex items-center justify-center text-xs">
-                                    Light
-                                  </div>
-                                  <div className="w-1/2 h-10 bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs">
-                                    Dark
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      )}
+                      <ThemeSelector
+                        themes={availableThemes}
+                        selectedTheme={availableThemes.find(theme => 
+                          (theme.url === currentThemeUrl) || 
+                          (theme.name === 'Default' && !currentThemeUrl)
+                        ) || availableThemes[0]}
+                        onThemeSelect={(theme) => {
+                          if (theme.name === 'Default' || theme.url.includes('default-theme.json')) {
+                            setColorTheme('default');
+                          } else {
+                            setColorTheme(theme.name, theme.url);
+                          }
+                        }}
+                        className="max-w-md"
+                      />
                       
                       <div className="mt-4">
                         <p className="text-xs text-muted-foreground">
