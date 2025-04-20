@@ -1,6 +1,7 @@
-import { BookText, Command, PenLine, Plus, Search, Settings, Sliders, Palette } from "lucide-react"
+import { BookText, Command, PenLine, Plus, Search, Sliders, Palette } from "lucide-react"
 import { Link, useMatches, useRouterState } from "@tanstack/react-router"
 import { useFullscreen } from "@/hooks/use-fullscreen"
+import { useNotesStore } from "@/lib/notes/notes-store"
 
 import { SidebarActions } from "@/components/layout/sidebar-actions"
 import {
@@ -21,114 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { cn } from "@/lib/utils"
 
-// This is sample data
-const data = {
-  navMain: [
-    // {
-    //   title: "Prompt",
-    //   url: "/prompt",
-    //   icon: Sparkles,
-    //   shortcut: "⌘/",
-    //   shortcutKeys: ["meta", "/"],
-    // },
-    {
-      title: "Today's Journal",
-      url: "/journal",
-      icon: PenLine,
-      shortcut: "⌘J",
-      shortcutKeys: ["meta", "j"],
-    },
-    {
-      title: "Notes",
-      url: "/notes",
-      icon: BookText,
-      shortcut: "⌘L",
-      shortcutKeys: ["meta", "l"],
-    },
-  ],
-  notes: [
-    {
-      id: "1",
-      title: "Meeting Tomorrow",
-      date: "09:34 AM",
-      tags: ["work", "meeting"],
-      content:
-        "Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates.",
-    },
-    {
-      id: "2",
-      title: "Project Update",
-      date: "Yesterday",
-      tags: ["work", "project"],
-      content:
-        "Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps.",
-    },
-    {
-      id: "3",
-      title: "Weekend Plans",
-      date: "2 days ago",
-      tags: ["personal", "weekend"],
-      content:
-        "Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?",
-    },
-    {
-      id: "4",
-      title: "Question about Budget",
-      date: "2 days ago",
-      tags: ["work", "finance"],
-      content:
-        "I've reviewed the budget numbers you sent over.\nCan we set up a quick call to discuss some potential adjustments?",
-    },
-    {
-      id: "5",
-      title: "Important Announcement",
-      date: "1 week ago",
-      tags: ["work", "announcement"],
-      content:
-        "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future.",
-    },
-    {
-      id: "6",
-      title: "Feedback on Proposal",
-      date: "1 week ago",
-      tags: ["work", "feedback"],
-      content:
-        "Thank you for sending over the proposal. I've reviewed it and have some thoughts.\nCould we schedule a meeting to discuss my feedback in detail?",
-    },
-    {
-      id: "7",
-      title: "New Project Idea",
-      date: "1 week ago",
-      tags: ["work", "idea"],
-      content:
-        "I've been brainstorming and came up with an interesting project concept.\nDo you have time this week to discuss its potential impact and feasibility?",
-    },
-    {
-      id: "8",
-      title: "Vacation Plans",
-      date: "1 week ago",
-      tags: ["personal", "vacation"],
-      content:
-        "Just a heads up that I'll be taking a two-week vacation next month.\nI'll make sure all my projects are up to date before I leave.",
-    },
-    {
-      id: "9",
-      title: "Conference Registration",
-      date: "1 week ago",
-      tags: ["work", "conference"],
-      content:
-        "I've completed the registration for the upcoming tech conference.\nLet me know if you need any additional information from my end.",
-    },
-    {
-      id: "10",
-      title: "Team Dinner",
-      date: "1 week ago",
-      tags: ["work", "social"],
-      content:
-        "To celebrate our recent project success, I'd like to organize a team dinner.\nAre you available next Friday evening? Please let me know your preferences.",
-    },
-  ],
-}
+
 
 // Import the search component
 import { NoteSearch } from "@/components/search/note-search"
@@ -166,17 +60,13 @@ export function AppSidebar() {
     ? String(currentRouteMatch.params.noteId)
     : undefined
     
-  const entryId = isJournalRoute && currentRouteMatch?.routeId.includes('$entryId') && 'entryId' in currentRouteMatch.params
-    ? String(currentRouteMatch.params.entryId)
-    : undefined
-  
-  // We don't need the notes state anymore since we're using data.notes directly
-  // and conditionally rendering based on the route
-
-  // Note: Keyboard shortcuts will be handled in a dedicated hook in Phase 3
-
-  // Note: The activeItem state and notification to parent have been removed
-  // as we now use Tanstack Router for navigation state
+  // Commented out unused variable
+  // const entryId = isJournalRoute && currentRouteMatch?.routeId.includes('$entryId') && 'entryId' in currentRouteMatch.params
+  //   ? String(currentRouteMatch.params.entryId)
+  //   : undefined
+    
+  // Get notes from the store
+  const { notes, isLoading, searchResults, searchQuery, createNote } = useNotesStore()
 
   // If in fullscreen mode, don't render the sidebar
   if (isFullscreen) {
@@ -220,7 +110,20 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupContent className="px-1.5 md:px-0">
               <SidebarMenu className="space-y-4">
-                {data.navMain.map((item) => (
+                {[
+                  // {
+                  //   title: "Today's Journal",
+                  //   url: "/journal",
+                  //   icon: PenLine,
+                  //   shortcut: "⌘J",
+                  // },
+                  {
+                    title: "Notes",
+                    url: "/notes",
+                    icon: BookText,
+                    shortcut: "⌘L",
+                  },
+                ].map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       size="lg" 
@@ -313,6 +216,7 @@ export function AppSidebar() {
                       size="icon" 
                       className="h-7 w-7" 
                       aria-label="New Note"
+                      onClick={() => createNote("New Note", "# New Note\n\nWrite your content here...")}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -331,20 +235,76 @@ export function AppSidebar() {
             <ScrollArea className="h-full">
               <SidebarGroup className="px-0">
                 <SidebarGroupContent className="space-y-1 px-2 py-1">
-                  {data.notes.map((note) => (
+                  {searchQuery ? (
+                    searchResults.length > 0 ? (
+                      searchResults.map((result) => {
+                        // Find the actual note from the notes array using the result ID
+                        const note = notes.find(n => n.id === result.id);
+                        if (!note) return null;
+                        return (
+                          <Link
+                            to="/notes/$noteId"
+                            params={{ noteId: note.id }}
+                            key={note.id}
+                            className={`block rounded-md hover:bg-accent transition-colors ${noteId === note.id ? 'bg-accent' : ''}`}
+                          >
+                            <div className="p-3 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium truncate">{note.title}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(note.updatedAt || note.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                                </span>
+                              </div>
+                              <p className="line-clamp-2 text-xs text-muted-foreground">
+                                {/* Display a preview of the note content */}
+                                {note.title}
+                              </p>
+                              {/* Tags */}
+                              {note.tags && note.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {note.tags.map(tag => (
+                                    <span 
+                                      key={tag} 
+                                      className="text-xs bg-muted px-1.5 py-0.5 rounded-md text-muted-foreground"
+                                    >
+                                      #{tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </Link>
+                        );
+                      })
+                    ) : (
+                      <div className="px-4 py-2 text-sm text-muted-foreground">
+                        No results found
+                      </div>
+                    )
+                  ) : isLoading ? (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Loading notes...
+                    </div>
+                  ) : notes.length > 0 ? (
+                    notes.map((note) => (
                       <Link
                         to="/notes/$noteId"
-                        params={{ noteId: note.id || "1" }}
-                        key={note.title}
-                        className={`block rounded-md hover:bg-accent transition-colors ${noteId === (note.id || "1") ? 'bg-accent' : ''}`}
+                        params={{ noteId: note.id }}
+                        key={note.id}
+                        className={`block rounded-md hover:bg-accent transition-colors ${noteId === note.id ? 'bg-accent' : ''}`}
                       >
                         <div className="p-3 space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="font-medium truncate">{note.title}</span>
-                            <span className="text-xs text-muted-foreground">{note.date}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(note.updatedAt || note.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                            </span>
                           </div>
                           <p className="line-clamp-2 text-xs text-muted-foreground">
-                            {note.content}
+                            {/* Display note description as preview */}
+                            {note.description || (
+                              <span className="italic">No description</span>
+                            )}
                           </p>
                           {/* Tags */}
                           {note.tags && note.tags.length > 0 && (
@@ -362,7 +322,11 @@ export function AppSidebar() {
                         </div>
                       </Link>
                     ))
-                  }
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      No notes yet
+                    </div>
+                  )}
                 </SidebarGroupContent>
               </SidebarGroup>
             </ScrollArea>

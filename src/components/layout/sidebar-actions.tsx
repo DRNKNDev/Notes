@@ -9,19 +9,17 @@ export function SidebarActions() {
   const { theme, setTheme, effectiveTheme } = useTheme();
 
   const handleThemeChange = () => {
+    // Toggle between light and dark only (no system theme)
     if (theme === 'light') {
       setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
     } else {
       setTheme('light');
     }
   };
 
   const getThemeLabel = () => {
-    if (theme === 'light') return "Light Theme";
-    if (theme === 'dark') return "Dark Theme";
-    return "System Theme";
+    // Only light and dark themes
+    return theme === 'light' ? "Light Theme" : "Dark Theme";
   };
 
   return (

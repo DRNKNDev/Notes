@@ -7,15 +7,38 @@ import {
   markdownShortcutPlugin, 
   codeBlockPlugin, 
   linkPlugin, 
-  codeMirrorPlugin, 
+  codeMirrorPlugin,
+  MDXEditorMethods
 } from "@mdxeditor/editor"
 import { useThemeContext } from "@/components/theme-provider";
 import { tailwindCodeMirrorExtensions } from './codemirror-theme';
-import { useRef } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
 
+/**
+ * Normalizes markdown content to ensure consistent formatting
+ * This helps prevent cursor position issues in the MDXEditor
+ */
+function normalizeMarkdown(content: string | null | undefined): string {
+  console.log('normalizeMarkdown', content);
+  if (!content) return '# Default Note\n\nStart writing here...\n';
+  
+  // Ensure consistent line endings (convert CRLF to LF)
+  let normalized = content.replace(/\r\n/g, '\n');
+  
+  // Ensure content ends with newline
+  if (!normalized.endsWith('\n')) {
+    normalized += '\n';
+  }
+  
+  // Ensure no consecutive triple newlines (can cause issues)
+  normalized = normalized.replace(/\n{3,}/g, '\n\n');
+  
+  return normalized;
+}
+
 interface NoteEditorProps {
-  markdown: string
+  markdown: string | null
   onChange: (markdown: string) => void
   onTitleChange?: (title: string) => void
 }
@@ -25,14 +48,30 @@ export function NoteEditor({
   onChange,
   onTitleChange,
 }: NoteEditorProps) {
+  // Create a ref to access editor methods
+  const editorRef = useRef<MDXEditorMethods>(null);
   const { effectiveTheme } = useThemeContext(); // Get current theme
   const isDarkMode = effectiveTheme === 'dark';
   
   // Use a ref to track if we're currently handling an update to prevent circular updates
   const isUpdatingRef = useRef(false);
   
-  // Handle markdown changes with title extraction
-  const handleMarkdownChange = (newMarkdown: string) => {
+  // Memoize the normalized markdown to prevent unnecessary re-renders
+  const safeMarkdown = useRef<string>('');
+  
+  // Only normalize markdown when it changes
+  if (safeMarkdown.current === '' || markdown !== null) {
+    safeMarkdown.current = normalizeMarkdown(markdown);
+  }
+  
+  // Store the latest markdown in a ref to use in the debounced function
+  const latestMarkdownRef = useRef<string>('');
+  
+  // Create a timeout ref for debouncing
+  const debounceTimeoutRef = useRef<number | null>(null);
+  
+  // Handle markdown changes with title extraction and debouncing
+  const processMarkdownChange = useCallback((markdown: string) => {
     // Prevent circular updates
     if (isUpdatingRef.current) return;
     
@@ -40,7 +79,7 @@ export function NoteEditor({
       isUpdatingRef.current = true;
       
       // Parse the markdown to extract title
-      const parsed = parseMarkdownWithTitle(newMarkdown);
+      const parsed = parseMarkdownWithTitle(markdown);
       
       // Notify parent about title change if callback provided
       if (onTitleChange && parsed.title) {
@@ -53,21 +92,59 @@ export function NoteEditor({
       // Always reset the flag when done
       isUpdatingRef.current = false;
     }
+  }, [onChange, onTitleChange]);
+  
+  // Debounced handler for markdown changes
+  const handleMarkdownChange = useCallback((newMarkdown: string) => {
+    // Store the latest markdown
+    latestMarkdownRef.current = newMarkdown;
+    
+    // Clear any existing timeout
+    if (debounceTimeoutRef.current !== null) {
+      window.clearTimeout(debounceTimeoutRef.current);
+    }
+    
+    // Set a new timeout
+    debounceTimeoutRef.current = window.setTimeout(() => {
+      processMarkdownChange(latestMarkdownRef.current);
+      debounceTimeoutRef.current = null;
+    }, 500); // 500ms debounce delay
+  }, [processMarkdownChange]);
+  
+  // Clean up the timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current !== null) {
+        window.clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+  
+  // Handle editor errors
+  const handleError = (payload: { error: string; source: string }) => {
+    console.error('MDXEditor error:', payload.error, 'Source:', payload.source);
+    // Prevent the error from crashing the app
+    // You could also implement a retry mechanism here
   };
-
+  
   return (
     <div className="flex flex-col w-full">
       <MDXEditor
-      markdown={markdown}
+      ref={editorRef}
+      markdown={safeMarkdown.current}
       onChange={handleMarkdownChange}
+      onError={handleError}
+      autoFocus
       plugins={
         [
           headingsPlugin(),
           listsPlugin(),
           quotePlugin(),
           thematicBreakPlugin(),
-          codeBlockPlugin(), 
-          codeMirrorPlugin({ 
+          codeBlockPlugin({
+            defaultCodeBlockLanguage: 'txt'
+          }), 
+          codeMirrorPlugin({
             codeBlockLanguages: {
               html: 'HTML',
               css: 'CSS',

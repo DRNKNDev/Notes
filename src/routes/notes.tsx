@@ -1,4 +1,6 @@
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { useNotesStore } from "@/lib/notes/notes-store";
+import { useEffect } from "react";
 
 // This route serves as a layout for the nested notes routes
 // The sidebar is now handled by AppSidebar component
@@ -10,6 +12,23 @@ function NotesLayout() {
   // Get current route state to check parameters
   const routerState = useRouterState();
   const currentRoute = routerState.matches[routerState.matches.length - 1];
+  
+  // Access notes store - only get what we need
+  const { 
+    isLoading, 
+    isInitialized,
+    initializeFromStorage 
+  } = useNotesStore();
+  
+  // Removed debugging logs to prevent potential re-renders
+  
+  // Initialize store on component mount - this will only run once
+  useEffect(() => {
+    // Only attempt to initialize if not already initialized
+    if (!isInitialized && !isLoading) {
+      initializeFromStorage();
+    }
+  }, [isInitialized, isLoading, initializeFromStorage]);
   
   // Safely check if we're on a note detail route and extract the noteId
   const isNoteDetailRoute = currentRoute?.routeId.includes('$noteId');

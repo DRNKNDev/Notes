@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useThemeContext } from '@/components/theme-provider';
-import { FolderOpen, Check, Moon, Sun } from 'lucide-react';
+import { FolderOpen, CheckCircle, Moon, Sun, Loader2 } from 'lucide-react';
 import type { Theme } from '@/hooks/use-theme';
+import * as path from '@tauri-apps/api/path';
+import { open } from '@tauri-apps/plugin-dialog';
+import { useNotesStore } from '@/lib/notes/notes-store';
+import { toast } from 'sonner';
 
 // Define the onboarding steps
 type OnboardingStep = 'directory' | 'theme';
@@ -20,16 +23,80 @@ export const Route = createFileRoute('/onboarding')({
 function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('directory');
   const [directoryPath, setDirectoryPath] = useState<string>('');
+  const [directoryName, setDirectoryName] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<string>('zinc');
+  const [isProcessing, setIsProcessing] = useState(false);
   const { setTheme, effectiveTheme } = useThemeContext();
   const navigate = useNavigate();
+  
+  // Get the notes store
+  const { 
+    setBaseStoragePath, 
+    baseStoragePath,
+    isLoading, 
+    error, 
+    clearError 
+  } = useNotesStore();
+
+  // Check if we already have a base storage path
+  useEffect(() => {
+    if (baseStoragePath) {
+      // If we already have a base storage path, skip to the theme step
+      setCurrentStep('theme');
+      // Extract the directory name for display
+      path.basename(baseStoragePath).then((name: string) => {
+        setDirectoryName(name);
+        setDirectoryPath(baseStoragePath);
+      }).catch(console.error);
+    }
+    
+    // No need to load username anymore
+  }, [baseStoragePath]);
+
+  // Handle errors from the notes store
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      clearError();
+    }
+  }, [error, clearError]);
 
   // Handle directory selection
-  const handleDirectorySelect = () => {
-    // In a real implementation, this would use Tauri's dialog API
-    // For now, we'll just simulate it
-    console.log('Selected directory:', directoryPath);
-    setCurrentStep('theme');
+  const handleDirectorySelect = async () => {
+    try {
+      setIsProcessing(true);
+      
+      // Open the directory selection dialog
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: "Select Base Storage Directory",
+      });
+      
+      if (selected && typeof selected === 'string') {
+        setDirectoryPath(selected);
+        
+        // Get just the directory name for display
+        const name = await path.basename(selected);
+        setDirectoryName(name);
+        
+        setIsProcessing(false);
+      } else {
+        // User cancelled the dialog
+        setIsProcessing(false);
+      }
+    } catch (err) {
+      console.error('Error selecting directory:', err);
+      toast.error(`Failed to select directory: ${err instanceof Error ? err.message : String(err)}`);
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle moving to next step
+  const handleNextStep = () => {
+    if (currentStep === 'directory') {
+      setCurrentStep('theme');
+    }
   };
 
   // Handle theme selection
@@ -40,16 +107,31 @@ function OnboardingPage() {
   };
 
   // Handle completing onboarding
-  const handleComplete = () => {
-    // In a real implementation, save settings to persistent storage
-    console.log('Completed onboarding with:', {
-      directoryPath,
-      theme: selectedTheme,
-      mode: effectiveTheme
-    });
+  const handleComplete = async () => {
+    if (!directoryPath) {
+      toast.error('Please select a directory first');
+      return;
+    }
     
-    // Navigate to the notes page
-    navigate({ to: '/notes' });
+    try {
+      setIsProcessing(true);
+      
+      // Set onboarding completion flag
+      localStorage.setItem('isOnboardingComplete', 'true');
+      
+      // Initialize the notes store with the selected directory
+      await setBaseStoragePath(directoryPath);
+      
+      // Show success message
+      toast.success('Setup complete! Your notes will be stored in the selected directory.');
+      
+      // Navigate to the notes page
+      navigate({ to: '/notes' });
+    } catch (err) {
+      console.error('Error completing onboarding:', err);
+      toast.error(`Setup failed: ${err instanceof Error ? err.message : String(err)}`);
+      setIsProcessing(false);
+    }
   };
 
   // Available themes
@@ -88,23 +170,26 @@ function OnboardingPage() {
             {currentStep === 'directory' ? (
               <div className="space-y-4">
                 <div className="p-4 bg-muted/50 rounded-lg border border-muted">
-                  <div className="flex items-center mb-4">
-                    <FolderOpen className="h-5 w-5 mr-2 text-primary" />
-                    <h3 className="font-medium">Notes Directory</h3>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <Input 
-                        id="directory" 
-                        placeholder="Select a directory for your notes" 
-                        value={directoryPath}
-                        onChange={(e) => setDirectoryPath(e.target.value)}
-                        className="flex-1 text-sm"
-                      />
-                      <Button variant="outline" size="icon">
-                        <FolderOpen className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <div className="space-y-4">
+                    {directoryPath ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="p-3 bg-background rounded-md border border-border flex items-center">
+                          <div className="flex-1 truncate text-sm">
+                            {directoryPath}
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={handleDirectorySelect} className="ml-2">
+                            Change
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        <Button onClick={handleDirectorySelect} className="w-full justify-start" variant="outline">
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          Select Notes Directory
+                        </Button>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       Choose where your markdown notes will be stored on your device
                     </p>
@@ -127,7 +212,7 @@ function OnboardingPage() {
                         onClick={() => handleThemeSelect(theme.name)}
                       >
                         {selectedTheme === theme.name && (
-                          <Check className="mr-2 h-4 w-4" />
+                          <CheckCircle className="mr-2 h-4 w-4" />
                         )}
                         {theme.label}
                       </Button>
@@ -173,8 +258,8 @@ function OnboardingPage() {
             <div className="flex-1"></div>
             {currentStep === 'directory' ? (
               <Button 
-                onClick={handleDirectorySelect}
-                disabled={!directoryPath.trim()}
+                onClick={handleNextStep}
+                disabled={!directoryPath.trim() || isProcessing}
                 className="bg-primary hover:bg-primary/90"
               >
                 Next
@@ -183,10 +268,20 @@ function OnboardingPage() {
             ) : (
               <Button 
                 onClick={handleComplete}
+                disabled={!directoryPath.trim() || isProcessing || isLoading}
                 className="bg-primary hover:bg-primary/90"
               >
-                Complete
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 h-4 w-4"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                {isProcessing || isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Complete
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 h-4 w-4"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </>
+                )}
               </Button>
             )}
           </CardFooter>

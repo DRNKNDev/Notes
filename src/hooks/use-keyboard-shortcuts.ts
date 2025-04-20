@@ -1,10 +1,23 @@
 import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useFullscreen } from './use-fullscreen';
+import { useNotesStore } from "@/lib/notes/notes-store";
+import { useFullscreen } from "./use-fullscreen";
 
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
   const { toggleFullscreen } = useFullscreen();
+  const { createNote } = useNotesStore();
+
+  // Handler for creating a new note
+  const handleCreateNewNote = async () => {
+    try {
+      const newNote = await createNote("New Note", "Write your content here...");
+      // Navigate to the new note
+      navigate({ to: '/notes/$noteId', params: { noteId: newNote.id } });
+    } catch (error) {
+      console.error("Error creating new note:", error);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -18,6 +31,12 @@ export function useKeyboardShortcuts() {
       // Check if Command (Meta) key is pressed (without Control)
       if (event.metaKey && !event.ctrlKey) {
         switch (event.key) {
+          case 'n':
+          case 'N':
+            // Command + N for New Note
+            event.preventDefault();
+            handleCreateNewNote();
+            break;
           case '/':
             // Command + / for Prompt
             event.preventDefault();
@@ -54,5 +73,5 @@ export function useKeyboardShortcuts() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigate]);
+  }, [navigate, toggleFullscreen, handleCreateNewNote]);
 }

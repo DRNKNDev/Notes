@@ -1,10 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { NoteEditor } from "@/components/editor/note-editor";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import markdownContent from "@/assets/sample-note.md?raw";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { cn } from "@/lib/utils";
+import { useNotesStore } from "@/lib/notes/notes-store";
+import { Note } from "@/lib/notes/types";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Loader2, Trash, Maximize2Icon, MinimizeIcon } from "lucide-react";
+import { toast } from "sonner";
+
 // This route handles displaying a specific note by its ID
 export const Route = createFileRoute('/notes/$noteId')({  
   component: NoteView
@@ -12,59 +18,141 @@ export const Route = createFileRoute('/notes/$noteId')({
 
 function NoteView() {
   const { noteId } = Route.useParams();
+  const navigate = useNavigate();
   
-  // Sample data for notes (this would typically come from a data store)
-  // Using useState to simulate mutable data source for this example
-  const [notes, setNotes] = useState([
-    {
-      id: "1",
-      title: "Welcome to DRNKN Notes!",
-      date: "09:34 AM",
-      content: markdownContent.split('\n').slice(5).join('\n'), // Get content after frontmatter
-    },
-    {
-      id: "2",
-      title: "Project Update",
-      date: "Yesterday",
-      content: "Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps.",
-    },
-    {
-      id: "3",
-      title: "Weekend Plans",
-      date: "2 days ago",
-      content: "Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?",
-    },
-    {
-      id: "4",
-      title: "Important Announcement",
-      date: "1 week ago",
-      content: "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future.",
-    }
-  ]);
+  // Get notes and actions from the store
+  const { 
+    notes, 
+    saveNote, 
+    deleteNote, 
+    isLoading, 
+    error 
+  } = useNotesStore();
   
-  // Find the note with the matching ID
-  const note = notes.find(note => note.id === noteId);
+  // State for tracking if we're currently saving
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // State for the combined markdown content in the editor
+  // Initialize with empty string to prevent unmount on ID change
   const [editorMarkdown, setEditorMarkdown] = useState<string>('');
+  
+  // State for the current note title
+  const [currentTitle, setCurrentTitle] = useState<string>('');
+  
+  // Track if we've already loaded this note to prevent double loading
+  const loadedNoteIdRef = useRef<string | null>(null);
+  // Ref to track if the initial load is complete to prevent auto-save on mount
+  const isInitialLoadCompleteRef = useRef(false);
+  
+  // Get fullscreen state and toggle function
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+  
+  // Find the note with the matching ID
+  const note = notes.find(note => note.id === noteId) as Note | undefined;
+  
+  // Initialize editor markdown when noteId changes
+  useEffect(() => {
+    // Skip if we've already loaded this note
+    if (loadedNoteIdRef.current === noteId) return;
+    
+    // Reset initial load flag
+    isInitialLoadCompleteRef.current = false;
+    
+    // Reset state when noteId changes - KEEP editorMarkdown to prevent unmount
+    setCurrentTitle('');
+    
+    if (note) {
+      // Mark this note as loaded
+      loadedNoteIdRef.current = noteId;
+      
+      // Construct initial editor markdown
+      const initialTitle = note.title || 'Untitled';
+      
+      // Check if bodyContent already starts with a title
+      let initialContent = note.bodyContent || '';
+      
+      // Ensure consistent line endings (convert CRLF to LF)
+      initialContent = initialContent.replace(/\r\n/g, '\n');
+      
+      // Remove any existing H1 header to prevent duplication
+      if (initialContent.trim().startsWith('# ')) {
+        // Content already has a header, use it as is
+        const initialMarkdown = initialContent;
+        setEditorMarkdown(initialMarkdown);
+      } else {
+        // Content doesn't have a header, add one
+        const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
+        setEditorMarkdown(initialMarkdown);
+      }
+      
+      setCurrentTitle(initialTitle);
+    }
+  }, [noteId, note]); // Include note to ensure we have the latest data
 
-  if (!note) {
+  // Auto-save effect
+  useEffect(() => {
+    // Don't save if the initial load isn't complete or if content is null
+    if (!isInitialLoadCompleteRef.current || editorMarkdown === null) {
+      // If the markdown is loaded, mark initial load as complete
+      if (editorMarkdown !== null) {
+        isInitialLoadCompleteRef.current = true;
+      }
+      return;
+    }
+    
+    // Don't save if we are already saving
+    if (isSaving) return;
+    
+    // Set up the debounced save
+    const handler = setTimeout(() => {
+      handleSave();
+    }, 1000); // Save after 1 second of inactivity
+
+    // Cleanup function to clear the timeout if the effect runs again
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [editorMarkdown, currentTitle]); // Re-run effect when content or title changes
+
+  // Handle error states
+  if (error) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">Note not found</p>
+        <div className="text-center">
+          <p className="text-destructive mb-2">Error loading note</p>
+          <p className="text-muted-foreground text-sm mb-4">{error}</p>
+          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
+            Back to Notes
+          </Button>
+        </div>
       </div>
     );
   }
   
-  // Initialize editor markdown when noteId changes
-  useEffect(() => {
-    // Construct initial editor markdown
-    const initialTitle = note.title || 'Untitled';
-    const initialContent = note.content || '';
-    const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
-    setEditorMarkdown(initialMarkdown);
-  }, [noteId, note]);
-
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  
+  // Handle note not found
+  if (!note) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Note not found</p>
+          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
+            Back to Notes
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
   // Handle editor content changes
   const handleEditorChange = (newMarkdown: string) => {
     // Update the editor markdown state
@@ -73,32 +161,134 @@ function NoteView() {
   
   // Handle title changes separately
   const handleTitleChange = (newTitle: string) => {
-    // Update the notes data with the new title
-    setNotes(prevNotes => 
-      prevNotes.map(n => 
-        n.id === noteId ? { ...n, title: newTitle } : n
-      )
-    );
+    setCurrentTitle(newTitle);
   };
   
-  // Get fullscreen state
-  const { isFullscreen } = useFullscreen();
+  // Save the current note
+  const handleSave = async () => {
+    if (!note || editorMarkdown === null || !isInitialLoadCompleteRef.current || isSaving) return;
+    
+    try {
+      setIsSaving(true);
+      
+      // Use the full markdown content for saving
+      const noteContent = editorMarkdown;
+      
+      // Save the note - pass the noteId, content, and title separately
+      const updatedNote = await saveNote(note.id, noteContent, currentTitle);
+      
+      // If the ID changed due to title update, navigate to the new URL smoothly
+      if (updatedNote.id !== note.id) {
+        navigate({
+          to: '/notes/$noteId',
+          params: { noteId: updatedNote.id }, 
+          replace: true, 
+        });
+      }
+      
+      toast.success("Note saved successfully", {
+        description: "Your changes have been saved to disk"
+      });
+    } catch (error) {
+      console.error("Error saving note:", error);
+      toast.error("Failed to save note", {
+        description: "Please try again or check console for details"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Delete the current note
+  const handleDelete = async () => {
+    if (!note) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteNote(note.id);
+      toast.success("Note deleted successfully", {
+        description: "The note has been permanently removed"
+      });
+      navigate({ to: '/notes', search: {} });
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      toast.error("Failed to delete note", {
+        description: "Please try again or check console for details"
+      });
+      setIsDeleting(false);
+    }
+  };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
+      {/* Floating Fullscreen Button - Top Right */}
+      <div className="absolute top-2 right-2 z-10">
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleFullscreen}
+                className="h-8 w-8" // Added size class
+              >
+                {isFullscreen ? <MinimizeIcon className="h-4 w-4" /> : <Maximize2Icon className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="end" sideOffset={5}> {/* Changed align to end */} 
+              <div className="flex items-center justify-between">
+                <p>Toggle Fullscreen</p>
+                {/* Using span for special characters */} 
+                <span className="text-xs text-muted ml-2 font-mono">⌃⌘F</span> 
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
       <ScrollArea className="flex-1 h-full w-full">
         <div className={cn(
           "min-h-full",
           isFullscreen ? "p-40 pt-20" : "px-6 pb-20"
         )}>
-          <NoteEditor 
-            key={noteId} // Use noteId as key to force complete re-render when switching notes
-            markdown={editorMarkdown} // Pass combined markdown
-            onChange={handleEditorChange} // Pass the content change handler
-            onTitleChange={handleTitleChange} // Pass the title change handler
-          />
+          {/* Keep editor mounted if note exists and is loaded, even if markdown is temporarily empty during transition */}
+          {note && loadedNoteIdRef.current === noteId ? (
+            <NoteEditor 
+              markdown={editorMarkdown} // Pass combined markdown
+              onChange={handleEditorChange} // Pass the content change handler
+              onTitleChange={handleTitleChange} // Pass the title change handler
+            />
+          ) : null}
         </div>
       </ScrollArea>
+
+      {/* Floating Delete Button */}
+      <div className="absolute bottom-9 right-2 z-10">
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-destructive hover:bg-destructive/10 h-8 w-8"
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <div className="flex items-center justify-between">
+                <p>Delete Note</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   );
 }
