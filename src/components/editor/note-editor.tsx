@@ -50,8 +50,8 @@ export function NoteEditor({
 }: NoteEditorProps) {
   // Create a ref to access editor methods
   const editorRef = useRef<MDXEditorMethods>(null);
-  const { effectiveTheme } = useThemeContext(); // Get current theme
-  const isDarkMode = effectiveTheme === 'dark';
+  const { mode } = useThemeContext(); // Get current theme
+  const isDarkMode = mode === 'dark';
   
   // Use a ref to track if we're currently handling an update to prevent circular updates
   const isUpdatingRef = useRef(false);

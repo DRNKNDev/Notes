@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 
 export function SidebarActions() {
 
-  const { theme, setTheme, effectiveTheme } = useTheme();
+  const { theme, setTheme, mode } = useTheme();
 
   const handleThemeChange = () => {
     // Toggle between light and dark only (no system theme)
@@ -32,7 +32,7 @@ export function SidebarActions() {
               onClick={handleThemeChange} 
               className="justify-start w-full"
             >
-              {effectiveTheme === 'dark' ? (
+              {mode === 'dark' ? (
                 <Moon className="size-4 mr-2" />
               ) : (
                 <Sun className="size-4 mr-2" />

@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import useTheme, { Theme, EffectiveTheme } from '../hooks/use-theme';
+import useTheme, { Theme } from '../hooks/use-theme';
 
 type ThemeContextType = {
   // Light/dark mode
@@ -7,7 +7,6 @@ type ThemeContextType = {
   setTheme: (theme: Theme) => void; // For backward compatibility
   mode: Theme;
   setMode: (mode: Theme) => void;
-  effectiveTheme: EffectiveTheme;
   
   // Color theme
   colorTheme: any | null;

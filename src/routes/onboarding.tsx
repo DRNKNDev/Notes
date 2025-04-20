@@ -28,7 +28,7 @@ function OnboardingPage() {
   const [directoryName, setDirectoryName] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<{name: string, url: string}>(themesList[0]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { setMode, effectiveTheme, setColorTheme, isLoadingTheme } = useThemeContext();
+  const { setMode, mode, setColorTheme, isLoadingTheme } = useThemeContext();
   const navigate = useNavigate();
   
   // Get the notes store
@@ -232,14 +232,14 @@ function OnboardingPage() {
                 
                 <div className="p-4 bg-muted/50 rounded-lg border border-muted">
                   <div className="flex items-center mb-4">
-                    {effectiveTheme === 'light' ? (
+                    {mode === 'light' ? (
                       <Sun className="h-5 w-5 mr-2 text-primary" />
                     ) : (
                       <Moon className="h-5 w-5 mr-2 text-primary" />
                     )}
                     <h3 className="font-medium">Appearance</h3>
                   </div>
-                  <Tabs defaultValue={effectiveTheme} className="w-full" onValueChange={(value) => setMode(value as Theme)}>
+                  <Tabs defaultValue={mode} className="w-full" onValueChange={(value) => setMode(value as Theme)}>
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="light" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                         <Sun className="mr-2 h-4 w-4" />
