@@ -3,10 +3,9 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useThemeContext } from '@/components/theme-provider';
-import { FolderOpen, Check, Moon, Sun, Loader2 } from 'lucide-react';
+import { FolderOpen, CheckCircle, Moon, Sun, Loader2 } from 'lucide-react';
 import type { Theme } from '@/hooks/use-theme';
 import * as path from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -171,23 +170,26 @@ function OnboardingPage() {
             {currentStep === 'directory' ? (
               <div className="space-y-4">
                 <div className="p-4 bg-muted/50 rounded-lg border border-muted">
-                  <div className="flex items-center mb-4">
-                    <FolderOpen className="h-5 w-5 mr-2 text-primary" />
-                    <h3 className="font-medium">Notes Directory</h3>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <Input 
-                        id="directory" 
-                        placeholder="Select a directory for your notes" 
-                        value={directoryPath}
-                        onChange={(e) => setDirectoryPath(e.target.value)}
-                        className="flex-1 text-sm"
-                      />
-                      <Button variant="outline" size="icon" onClick={handleDirectorySelect}>
-                        <FolderOpen className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <div className="space-y-4">
+                    {directoryPath ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="p-3 bg-background rounded-md border border-border flex items-center">
+                          <div className="flex-1 truncate text-sm">
+                            {directoryPath}
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={handleDirectorySelect} className="ml-2">
+                            Change
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        <Button onClick={handleDirectorySelect} className="w-full justify-start" variant="outline">
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          Select Notes Directory
+                        </Button>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       Choose where your markdown notes will be stored on your device
                     </p>
@@ -210,7 +212,7 @@ function OnboardingPage() {
                         onClick={() => handleThemeSelect(theme.name)}
                       >
                         {selectedTheme === theme.name && (
-                          <Check className="mr-2 h-4 w-4" />
+                          <CheckCircle className="mr-2 h-4 w-4" />
                         )}
                         {theme.label}
                       </Button>
