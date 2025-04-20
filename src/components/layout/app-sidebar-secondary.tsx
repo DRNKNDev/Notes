@@ -1,6 +1,8 @@
-import { Plus, Palette, Sliders, Search } from "lucide-react"
+import { Plus, Palette, Sliders, Search, BookText, Moon, Sun, Settings } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import { useNotesStore } from "@/lib/notes/notes-store"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { useThemeContext } from "@/components/theme-provider"
 
 import {
   Sidebar,
@@ -8,6 +10,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
@@ -33,6 +36,12 @@ export function AppSidebarSecondary({
   // Determine if we're on notes, settings route
   const isNotesRoute = currentPath.startsWith("/notes")
   const isSettingsRoute = currentPath.startsWith("/settings")
+  
+  // Check if we're on mobile
+  const isMobile = useIsMobile()
+  
+  // Get theme context for theme toggle
+  const { mode, setMode } = useThemeContext()
   
   // Get notes from the store
   const { notes, isLoading, searchResults, searchQuery, createNote } = useNotesStore()
@@ -204,6 +213,98 @@ export function AppSidebarSecondary({
               </SidebarGroup>
             </ScrollArea>
           </SidebarContent>
+          
+          {/* Mobile-only footer with navigation buttons */}
+          {isMobile && (
+            <SidebarFooter className="border-t border-muted">
+              <div className="flex justify-between items-center p-2">
+                {/* Left side - Notes button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      asChild
+                    >
+                      <Link
+                        to="/notes"
+                        activeProps={{
+                          className: "bg-accent text-accent-foreground",
+                        }}
+                        activeOptions={{
+                          exact: false,
+                        }}
+                      >
+                        <BookText className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" align="center" sideOffset={10}>
+                    <div className="flex items-center justify-between gap-2">
+                      <p>Notes</p>
+                      <div className="text-xs text-muted">⌘L</div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+                
+                {/* Right side - Theme toggle and Settings */}
+                <div className="flex gap-1">
+                  {/* Theme toggle */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
+                      >
+                        {mode === 'dark' ? (
+                          <Moon className="h-4 w-4" />
+                        ) : (
+                          <Sun className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" align="center" sideOffset={10}>
+                      <p>Toggle Theme</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  
+                  {/* Settings button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        asChild
+                      >
+                        <Link
+                          to="/settings"
+                          search={{ category: 'general' }}
+                          activeProps={{
+                            className: "bg-accent text-accent-foreground",
+                          }}
+                          activeOptions={{
+                            exact: false,
+                          }}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" align="center" sideOffset={10}>
+                      <div className="flex items-center justify-between gap-2">
+                        <p>Settings</p>
+                        <div className="text-xs text-muted">⌘,</div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+            </SidebarFooter>
+          )}
         </Sidebar>
       )}
       {isSettingsRoute && (
@@ -258,6 +359,98 @@ export function AppSidebarSecondary({
               </div>
             </ScrollArea>
           </SidebarContent>
+          
+          {/* Mobile-only footer with navigation buttons */}
+          {isMobile && (
+            <SidebarFooter className="border-t border-muted">
+              <div className="flex justify-between items-center p-2">
+                {/* Left side - Notes button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      asChild
+                    >
+                      <Link
+                        to="/notes"
+                        activeProps={{
+                          className: "bg-accent text-accent-foreground",
+                        }}
+                        activeOptions={{
+                          exact: false,
+                        }}
+                      >
+                        <BookText className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" align="center" sideOffset={10}>
+                    <div className="flex items-center justify-between gap-2">
+                      <p>Notes</p>
+                      <div className="text-xs text-muted">⌘L</div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+                
+                {/* Right side - Theme toggle and Settings */}
+                <div className="flex gap-1">
+                  {/* Theme toggle */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
+                      >
+                        {mode === 'dark' ? (
+                          <Moon className="h-4 w-4" />
+                        ) : (
+                          <Sun className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" align="center" sideOffset={10}>
+                      <p>Toggle Theme</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  
+                  {/* Settings button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        asChild
+                      >
+                        <Link
+                          to="/settings"
+                          search={{ category: 'general' }}
+                          activeProps={{
+                            className: "bg-accent text-accent-foreground",
+                          }}
+                          activeOptions={{
+                            exact: false,
+                          }}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" align="center" sideOffset={10}>
+                      <div className="flex items-center justify-between gap-2">
+                        <p>Settings</p>
+                        <div className="text-xs text-muted">⌘,</div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+            </SidebarFooter>
+          )}
         </Sidebar>
       )}
     </>
