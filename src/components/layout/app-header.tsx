@@ -10,15 +10,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { Maximize2Icon, MinimizeIcon } from "lucide-react";
-import { useFullscreen } from "@/hooks/use-fullscreen";
 
 export function AppHeader() {
   // Always call hooks at the top level
   const matches = useMatches();
   const routerState = useRouterState();
-  const { isFullscreen, toggleFullscreen } = useFullscreen();
   
   // Get route parameters safely
   const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
@@ -77,11 +73,6 @@ export function AppHeader() {
     return "Notes"; // Default
   };
 
-  // If in fullscreen mode, don't render the header
-  if (isFullscreen) {
-    return null;
-  }
-  
   return (
     <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b border-muted bg-background p-2 z-10">
       {!hideSecondarySidebar && (
@@ -135,28 +126,6 @@ export function AppHeader() {
           )}
         </BreadcrumbList>
       </Breadcrumb>
-      
-      {/* Spacer to push the fullscreen button to the right */}
-      <div className="flex-1" />
-      
-      {/* Fullscreen button */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleFullscreen}
-          >
-            {isFullscreen ? <MinimizeIcon className="h-4 w-4" /> : <Maximize2Icon className="h-4 w-4" />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" align="center" sideOffset={5}>
-          <div className="flex items-center justify-between">
-            <p>Toggle Fullscreen</p>
-            <div className="text-xs text-muted ml-2">⌃⌘F</div>
-          </div>
-        </TooltipContent>
-      </Tooltip>
     </header>
   );
 }
