@@ -4,15 +4,119 @@
     "url": "@/assets/default-theme.json"
   },
   {
-    "name": "Neo Brutalism",
-    "url": "https://tweakcn.com/r/themes/neo-brutalism.json"
+    "name": "Bold Tech",
+    "url": "https://tweakcn.com/r/themes/bold-tech.json"
   },
   {
     "name": "Bubblegum",
     "url": "https://tweakcn.com/r/themes/bubblegum.json"
   },
   {
+    "name": "Caffeine",
+    "url": "https://tweakcn.com/r/themes/caffeine.json"
+  },
+  {
+    "name": "Candyland",
+    "url": "https://tweakcn.com/r/themes/candyland.json"
+  },
+  {
+    "name": "Catppuccin",
+    "url": "https://tweakcn.com/r/themes/catppuccin.json"
+  },
+  {
+    "name": "Claude",
+    "url": "https://tweakcn.com/r/themes/claude.json"
+  },
+  {
+    "name": "Claymorphism",
+    "url": "https://tweakcn.com/r/themes/claymorphism.json"
+  },
+  {
+    "name": "Clean Slate",
+    "url": "https://tweakcn.com/r/themes/clean-slate.json"
+  },
+  {
+    "name": "Cosmic Night",
+    "url": "https://tweakcn.com/r/themes/cosmic-night.json"
+  },
+  {
+    "name": "Cyberpunk",
+    "url": "https://tweakcn.com/r/themes/cyberpunk.json"
+  },
+  {
+    "name": "Elegant Luxury",
+    "url": "https://tweakcn.com/r/themes/elegant-luxury.json"
+  },
+  {
+    "name": "Kodama Grove",
+    "url": "https://tweakcn.com/r/themes/kodama-grove.json"
+  },
+  {
+    "name": "Midnight Bloom",
+    "url": "https://tweakcn.com/r/themes/midnight-bloom.json"
+  },
+  {
     "name": "Modern Minimal",
     "url": "https://tweakcn.com/r/themes/modern-minimal.json"
+  },
+  {
+    "name": "Nature",
+    "url": "https://tweakcn.com/r/themes/nature.json"
+  },
+  {
+    "name": "Neo Brutalism",
+    "url": "https://tweakcn.com/r/themes/neo-brutalism.json"
+  },
+  {
+    "name": "Northern Lights",
+    "url": "https://tweakcn.com/r/themes/northern-lights.json"
+  },
+  {
+    "name": "Ocean Breeze",
+    "url": "https://tweakcn.com/r/themes/ocean-breeze.json"
+  },
+  {
+    "name": "Pastel Dreams",
+    "url": "https://tweakcn.com/r/themes/pastel-dreams.json"
+  },
+  {
+    "name": "Perpetuity",
+    "url": "https://tweakcn.com/r/themes/perpetuity.json"
+  },
+  {
+    "name": "Quantum Rose",
+    "url": "https://tweakcn.com/r/themes/quantum-rose.json"
+  },
+  {
+    "name": "Retro Arcade",
+    "url": "https://tweakcn.com/r/themes/retro-arcade.json"
+  },
+  {
+    "name": "Solar Dusk",
+    "url": "https://tweakcn.com/r/themes/solar-dusk.json"
+  },
+  {
+    "name": "Starry Night",
+    "url": "https://tweakcn.com/r/themes/starry-night.json"
+  },
+  {
+    "name": "Sunset Horizon",
+    "url": "https://tweakcn.com/r/themes/sunset-horizon.json"
+  },
+  {
+    "name": "T3 Chat",
+    "url": "https://tweakcn.com/r/themes/t3-chat.json"
+  },
+  {
+    "name": "Tangerine",
+    "url": "https://tweakcn.com/r/themes/tangerine.json"
+  },
+  {
+    "name": "Vercel",
+    "url": "https://tweakcn.com/r/themes/vercel.json"
+  },
+  {
+    "name": "Vintage Paper",
+    "url": "https://tweakcn.com/r/themes/vintage-paper.json"
   }
 ]
