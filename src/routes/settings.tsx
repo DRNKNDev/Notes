@@ -77,7 +77,7 @@ function SettingsPage() {
                     
                     <div className="col-span-full">
                       <div className="flex items-center gap-x-3 mt-4">
-                        <Checkbox id="enable-journal" name="enable-journal" defaultChecked />
+                        <Checkbox id="enable-journal" name="enable-journal" defaultChecked disabled />
                         <Label
                           htmlFor="enable-journal"
                           className="text-sm font-medium text-foreground"
@@ -113,7 +113,7 @@ function SettingsPage() {
                       >
                         Editor Font Size
                       </Label>
-                      <Select name="editor-font-size" defaultValue="medium">
+                      <Select name="editor-font-size" defaultValue="medium" disabled>
                         <SelectTrigger id="editor-font-size" className="mt-2">
                           <SelectValue placeholder="Select font size" />
                         </SelectTrigger>
@@ -126,17 +126,7 @@ function SettingsPage() {
                     </div>
                     
                     <div className="flex items-center gap-x-3">
-                      <Checkbox id="auto-save" name="auto-save" defaultChecked />
-                      <Label
-                        htmlFor="auto-save"
-                        className="text-sm font-medium text-foreground"
-                      >
-                        Auto-save notes
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center gap-x-3">
-                      <Checkbox id="use-native-fullscreen" name="use-native-fullscreen" defaultChecked />
+                      <Checkbox id="use-native-fullscreen" name="use-native-fullscreen" defaultChecked disabled />
                       <Label
                         htmlFor="use-native-fullscreen"
                         className="text-sm font-medium text-foreground"

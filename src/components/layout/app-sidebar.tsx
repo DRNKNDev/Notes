@@ -111,12 +111,12 @@ export function AppSidebar() {
             <SidebarGroupContent className="px-1.5 md:px-0">
               <SidebarMenu className="space-y-4">
                 {[
-                  {
-                    title: "Today's Journal",
-                    url: "/journal",
-                    icon: PenLine,
-                    shortcut: "⌘J",
-                  },
+                  // {
+                  //   title: "Today's Journal",
+                  //   url: "/journal",
+                  //   icon: PenLine,
+                  //   shortcut: "⌘J",
+                  // },
                   {
                     title: "Notes",
                     url: "/notes",
