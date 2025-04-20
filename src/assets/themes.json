@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Default",
+    "url": "@/assets/default-theme.json"
+  },
+  {
+    "name": "Neo Brutalism",
+    "url": "https://tweakcn.com/r/themes/neo-brutalism.json"
+  },
+  {
+    "name": "Bubblegum",
+    "url": "https://tweakcn.com/r/themes/bubblegum.json"
+  },
+  {
+    "name": "Modern Minimal",
+    "url": "https://tweakcn.com/r/themes/modern-minimal.json"
+  }
+]
