@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { useNotesStore } from "@/lib/notes/notes-store";
 import { Note } from "@/lib/notes/types";
 import { Button } from "@/components/ui/button";
-import { Loader2, Trash } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Loader2, Trash, Maximize2Icon, MinimizeIcon } from "lucide-react";
 import { toast } from "sonner";
 
 // This route handles displaying a specific note by its ID
@@ -44,8 +45,8 @@ function NoteView() {
   // Ref to track if the initial load is complete to prevent auto-save on mount
   const isInitialLoadCompleteRef = useRef(false);
   
-  // Get fullscreen state
-  const { isFullscreen } = useFullscreen();
+  // Get fullscreen state and toggle function
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
   
   // Find the note with the matching ID
   const note = notes.find(note => note.id === noteId) as Note | undefined;
@@ -219,34 +220,32 @@ function NoteView() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Note actions toolbar */}
-      <div className="border-b p-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {/* Save button removed */}
-        </div>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="text-destructive hover:bg-destructive/10"
-        >
-          {isDeleting ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Deleting...
-            </>
-          ) : (
-            <>
-              <Trash className="h-4 w-4 mr-2" />
-              Delete
-            </>
-          )}
-        </Button>
+    <div className="h-full flex flex-col relative">
+      {/* Floating Fullscreen Button - Top Right */}
+      <div className="absolute top-2 right-2 z-10">
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleFullscreen}
+                className="h-8 w-8" // Added size class
+              >
+                {isFullscreen ? <MinimizeIcon className="h-4 w-4" /> : <Maximize2Icon className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="end" sideOffset={5}> {/* Changed align to end */} 
+              <div className="flex items-center justify-between">
+                <p>Toggle Fullscreen</p>
+                {/* Using span for special characters */} 
+                <span className="text-xs text-muted-foreground ml-2 font-mono">⌃⌘F</span> 
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
-      
+
       <ScrollArea className="flex-1 h-full w-full">
         <div className={cn(
           "min-h-full",
@@ -262,6 +261,32 @@ function NoteView() {
           ) : null}
         </div>
       </ScrollArea>
+
+      {/* Floating Delete Button */}
+      <div className="absolute bottom-9 right-2 z-10">
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-destructive hover:bg-destructive/10 h-8 w-8"
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Delete Note</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   );
 }
