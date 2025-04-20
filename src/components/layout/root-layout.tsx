@@ -18,7 +18,7 @@ export function RootLayout({ children }: RootLayoutProps) {
   
   const matches = useMatches();
   const routePath = matches.length > 0 ? matches[matches.length - 1].pathname : "/";
-  const hideSecondarySidebar = routePath === "/prompt";
+  const hideSecondarySidebar = routePath === "/prompt" || routePath.startsWith("/journal");
 
   return (
     <SidebarProvider
@@ -32,7 +32,7 @@ export function RootLayout({ children }: RootLayoutProps) {
       }
     >
       <AppSidebar />
-      <SidebarInset className="flex flex-col">
+      <SidebarInset className="flex flex-col border-l border-muted">
         <AppHeader />
         <div className="flex-1 overflow-hidden rounded-br-lg">
           {children}

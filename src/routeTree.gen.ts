@@ -11,7 +11,9 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SettingsImport } from './routes/settings'
 import { Route as PromptImport } from './routes/prompt'
+import { Route as OnboardingImport } from './routes/onboarding'
 import { Route as NotesImport } from './routes/notes'
 import { Route as JournalImport } from './routes/journal'
 import { Route as IndexImport } from './routes/index'
@@ -20,9 +22,21 @@ import { Route as JournalEntryIdImport } from './routes/journal.$entryId'
 
 // Create/Update Routes
 
+const SettingsRoute = SettingsImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const PromptRoute = PromptImport.update({
   id: '/prompt',
   path: '/prompt',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const OnboardingRoute = OnboardingImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,11 +95,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesImport
       parentRoute: typeof rootRoute
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingImport
+      parentRoute: typeof rootRoute
+    }
     '/prompt': {
       id: '/prompt'
       path: '/prompt'
       fullPath: '/prompt'
       preLoaderRoute: typeof PromptImport
+      parentRoute: typeof rootRoute
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
     '/journal/$entryId': {
@@ -132,7 +160,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/journal': typeof JournalRouteWithChildren
   '/notes': typeof NotesRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/prompt': typeof PromptRoute
+  '/settings': typeof SettingsRoute
   '/journal/$entryId': typeof JournalEntryIdRoute
   '/notes/$noteId': typeof NotesNoteIdRoute
 }
@@ -141,7 +171,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/journal': typeof JournalRouteWithChildren
   '/notes': typeof NotesRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/prompt': typeof PromptRoute
+  '/settings': typeof SettingsRoute
   '/journal/$entryId': typeof JournalEntryIdRoute
   '/notes/$noteId': typeof NotesNoteIdRoute
 }
@@ -151,7 +183,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/journal': typeof JournalRouteWithChildren
   '/notes': typeof NotesRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/prompt': typeof PromptRoute
+  '/settings': typeof SettingsRoute
   '/journal/$entryId': typeof JournalEntryIdRoute
   '/notes/$noteId': typeof NotesNoteIdRoute
 }
@@ -162,7 +196,9 @@ export interface FileRouteTypes {
     | '/'
     | '/journal'
     | '/notes'
+    | '/onboarding'
     | '/prompt'
+    | '/settings'
     | '/journal/$entryId'
     | '/notes/$noteId'
   fileRoutesByTo: FileRoutesByTo
@@ -170,7 +206,9 @@ export interface FileRouteTypes {
     | '/'
     | '/journal'
     | '/notes'
+    | '/onboarding'
     | '/prompt'
+    | '/settings'
     | '/journal/$entryId'
     | '/notes/$noteId'
   id:
@@ -178,7 +216,9 @@ export interface FileRouteTypes {
     | '/'
     | '/journal'
     | '/notes'
+    | '/onboarding'
     | '/prompt'
+    | '/settings'
     | '/journal/$entryId'
     | '/notes/$noteId'
   fileRoutesById: FileRoutesById
@@ -188,14 +228,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JournalRoute: typeof JournalRouteWithChildren
   NotesRoute: typeof NotesRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
   PromptRoute: typeof PromptRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JournalRoute: JournalRouteWithChildren,
   NotesRoute: NotesRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
   PromptRoute: PromptRoute,
+  SettingsRoute: SettingsRoute,
 }
 
 export const routeTree = rootRoute
@@ -211,7 +255,9 @@ export const routeTree = rootRoute
         "/",
         "/journal",
         "/notes",
-        "/prompt"
+        "/onboarding",
+        "/prompt",
+        "/settings"
       ]
     },
     "/": {
@@ -229,8 +275,14 @@ export const routeTree = rootRoute
         "/notes/$noteId"
       ]
     },
+    "/onboarding": {
+      "filePath": "onboarding.tsx"
+    },
     "/prompt": {
       "filePath": "prompt.tsx"
+    },
+    "/settings": {
+      "filePath": "settings.tsx"
     },
     "/journal/$entryId": {
       "filePath": "journal.$entryId.tsx",

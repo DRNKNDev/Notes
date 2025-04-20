@@ -9,28 +9,33 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Maximize2Icon, MinimizeIcon } from "lucide-react";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 
 export function AppHeader() {
+  // Always call hooks at the top level
   const matches = useMatches();
+  const routerState = useRouterState();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+  
+  // Get route parameters safely
+  const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
+  const params = currentRouteMatch?.params || {};
+  const noteId = 'noteId' in params ? String(params.noteId) : undefined;
+  const entryId = 'entryId' in params ? String(params.entryId) : undefined;
+  
+  // Get settings category
+  const settingsCategory = 
+    currentRouteMatch?.pathname.startsWith('/settings') && 
+    currentRouteMatch.search && 
+    'category' in currentRouteMatch.search && 
+    currentRouteMatch.search.category === 'themes' ? 'themes' : 'general';
   
   // Get the current route path (for breadcrumb and header title)
   const currentRoute = matches.length > 0 ? matches[matches.length - 1] : null;
   const routePath = currentRoute?.pathname || "/";
-  
-  // Get current router state to safely check for route parameters
-  const routerState = useRouterState();
-  const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
-  
-  // Safely extract route parameters
-  const isNoteDetailRoute = currentRouteMatch?.routeId.includes('$noteId');
-  const noteId = isNoteDetailRoute && 'noteId' in currentRouteMatch.params 
-    ? String(currentRouteMatch.params.noteId) 
-    : undefined;
-    
-  const isJournalEntryRoute = currentRouteMatch?.routeId.includes('$entryId');
-  const entryId = isJournalEntryRoute && 'entryId' in currentRouteMatch.params 
-    ? String(currentRouteMatch.params.entryId) 
-    : undefined;
   
   // Determine if we should hide the sidebar trigger based on the route
   const hideSecondarySidebar = routePath === "/prompt";
@@ -48,7 +53,7 @@ export function AppHeader() {
           { id: "4", title: "Monthly Review" },
         ];
         const entry = entries.find(e => e.id === entryId);
-        return entry ? entry.title : "Journal Entry";
+        return entry ? entry.title : "Today's Journal";
       }
       return "Journal";
     }
@@ -66,47 +71,92 @@ export function AppHeader() {
       }
       return "Notes";
     }
+    if (routePath.startsWith("/settings")) {
+      return "Settings";
+    }
     return "Notes"; // Default
   };
 
+  // If in fullscreen mode, don't render the header
+  if (isFullscreen) {
+    return null;
+  }
+  
   return (
-    <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b bg-background p-2 z-10">
+    <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b border-muted bg-background p-2 z-10">
       {!hideSecondarySidebar && (
         <>
-          <SidebarTrigger />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SidebarTrigger />
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="center" sideOffset={5}>
+              <div className="flex items-center justify-between">
+                <p>Toggle Sidebar</p>
+                <div className="text-xs text-muted ml-2">⌘⇧B</div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
           <Separator orientation="vertical" className="mr-2 h-4" />
         </>
       )}
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem className="hidden md:block text-xs">
-            <BreadcrumbLink asChild>
-              <Link to="/notes">All Notes</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          
-          {/* Show section breadcrumb for nested routes */}
-          {(noteId || entryId) && (
+          {routePath.startsWith("/settings") ? (
+            // Settings breadcrumb
             <>
-              <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem className="hidden md:block text-xs">
                 <BreadcrumbLink asChild>
-                  <Link to={entryId ? "/journal" : "/notes"}>
-                    {entryId ? "Journal" : "Notes"}
-                  </Link>
+                  <Link to="/settings" search={{ category: 'general' }}>Settings</Link>
                 </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs">
+                  {settingsCategory === 'themes' ? 'Themes' : 'General'}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          ) : (
+            // Notes breadcrumb
+            <>
+              <BreadcrumbItem className="hidden md:block text-xs">
+                <BreadcrumbLink asChild>
+                  <Link to="/notes">All Notes</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs">
+                  {getRouteTitle()}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </>
           )}
-          
-          <BreadcrumbSeparator className="hidden md:block" />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="text-xs">
-              {getRouteTitle()}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+      
+      {/* Spacer to push the fullscreen button to the right */}
+      <div className="flex-1" />
+      
+      {/* Fullscreen button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleFullscreen}
+          >
+            {isFullscreen ? <MinimizeIcon className="h-4 w-4" /> : <Maximize2Icon className="h-4 w-4" />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="center" sideOffset={5}>
+          <div className="flex items-center justify-between">
+            <p>Toggle Fullscreen</p>
+            <div className="text-xs text-muted ml-2">⌃⌘F</div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
     </header>
   );
 }

@@ -113,24 +113,6 @@ function PromptPage() {
             
             <div className="flex justify-between items-center">
               <div className="flex gap-2 items-center">
-                <div className="flex items-center mr-2">
-                  <div className="flex rounded-md overflow-hidden border border-input text-xs">
-                    <button
-                      type="button"
-                      onClick={() => setIsChatMode(true)}
-                      className={`px-2 py-1 ${isChatMode ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-muted/50'}`}
-                    >
-                      Chat
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsChatMode(false)}
-                      className={`px-2 py-1 ${!isChatMode ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-muted/50'}`}
-                    >
-                      Write
-                    </button>
-                  </div>
-                </div>
                 <Button 
                   type="button" 
                   variant="ghost" 

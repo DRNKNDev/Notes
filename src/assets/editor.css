@@ -1,3 +1,4 @@
+/* https://mdxeditor.dev/editor/docs/theming */
 /* MDXEditor overrides using role attributes for more reliable targeting */
 .mdxeditor {
   padding: 0 !important;
@@ -21,8 +22,54 @@
   flex-direction: column !important;
 }
 
-/* Additional selectors to ensure no padding */
-.mdxeditor > div {
-  padding: 0 !important;
-  height: 100% !important;
+/* Add margin to CodeMirror wrapper - using a general selector that will work across versions */
+[class*="_codeMirrorWrapper_"] {
+  margin-top: 1rem !important;
+}
+
+/* Make the language selector dropdown in CodeMirror smaller */
+[class*="_codeMirrorToolbar_"] [class*="_selectTrigger_"] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  height: 1.5rem !important;
+}
+
+/* Style the dropdown content using the mdxeditor-select-content class */
+.mdxeditor-select-content {
+  font-size: 0.75rem !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  padding: 0.25rem !important;
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--border) !important;
+  background-color: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+}
+
+/* Style the dropdown items */
+.mdxeditor-select-content [role="option"] {
+  padding: 0.25rem 0.5rem !important;
+  border-radius: calc(var(--radius) - 2px) !important;
+}
+
+/* Style the highlighted dropdown item */
+.mdxeditor-select-content [data-highlighted] {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+/* Make SVG icons in CodeMirror toolbar smaller and use muted-foreground color */
+[class*="_codeMirrorToolbar_"] svg {
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--muted-foreground) !important;
+  margin-right: 0.5rem !important;
+}
+
+/* Add margin to horizontal rule and style it */
+.mdxeditor hr {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  border-color: var(--muted) !important;
+  border-width: 1px !important;
 }

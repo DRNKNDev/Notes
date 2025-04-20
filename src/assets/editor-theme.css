@@ -75,3 +75,7 @@
   color: var(--card-foreground);
   border-color: var(--border);
 }
+
+.mdx-dark-theme [role="dialog"] button {
+  color: var(--card-foreground);
+}

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./assets/global.css";
 import { ThemeProvider } from "./components/theme-provider";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -20,7 +21,9 @@ declare module '@tanstack/react-router' {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <TooltipProvider delayDuration={0}>
+        <RouterProvider router={router} />
+      </TooltipProvider>
     </ThemeProvider>
   </React.StrictMode>,
 );
