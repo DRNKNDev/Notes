@@ -60,12 +60,15 @@ export function AppSidebar() {
     ? String(currentRouteMatch.params.noteId)
     : undefined
     
-  const entryId = isJournalRoute && currentRouteMatch?.routeId.includes('$entryId') && 'entryId' in currentRouteMatch.params
-    ? String(currentRouteMatch.params.entryId)
-    : undefined
+  // Commented out unused variable
+  // const entryId = isJournalRoute && currentRouteMatch?.routeId.includes('$entryId') && 'entryId' in currentRouteMatch.params
+  //   ? String(currentRouteMatch.params.entryId)
+  //   : undefined
     
   // Get notes from the store
-  const { notes, isLoading, searchResults, searchQuery, createNote } = useNotesStore()
+  const { notes, isLoading, searchResults, searchQuery, createNote, baseStoragePath } = useNotesStore()
+  
+  // Removed debugging logs to prevent potential re-renders
   
   // We don't need the notes state anymore since we're using data.notes directly
   // and conditionally rendering based on the route

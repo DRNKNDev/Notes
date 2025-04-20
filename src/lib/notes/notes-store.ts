@@ -18,6 +18,9 @@ import {
 } from "../search/lunr-search";
 import { parseMarkdownWithTitle } from "@/hooks/use-markdown-title";
 
+// Counter to track initialization attempts (for debugging)
+let initCounter = 0;
+
 interface NotesState {
   // Storage paths
   baseStoragePath: string | null;
@@ -37,6 +40,7 @@ interface NotesState {
   // Status
   isLoading: boolean;
   error: string | null;
+  isInitialized: boolean; // Flag to track if store has been initialized
   
   // Actions
   setBaseStoragePath: (path: string) => Promise<void>;
@@ -47,6 +51,7 @@ interface NotesState {
   deleteNote: (noteId: string) => Promise<boolean>;
   searchNotes: (query: string) => Promise<void>;
   clearError: () => void;
+  initializeFromStorage: () => Promise<void>; // New function to initialize from storage
 }
 
 export const useNotesStore = create<NotesState>()(
@@ -64,6 +69,7 @@ export const useNotesStore = create<NotesState>()(
       searchResults: [],
       isLoading: false,
       error: null,
+      isInitialized: false,
       
       // Set the base storage path and initialize
       setBaseStoragePath: async (path: string) => {
@@ -83,12 +89,13 @@ export const useNotesStore = create<NotesState>()(
           // Load notes and index
           await get().loadNotesAndIndex();
           
-          set({ isLoading: false });
+          set({ isLoading: false, isInitialized: true });
         } catch (error) {
           console.error("Error setting base storage path:", error);
           set({
             isLoading: false,
             error: `Failed to set storage path: ${error}`,
+            isInitialized: false,
           });
         }
       },
@@ -110,7 +117,10 @@ export const useNotesStore = create<NotesState>()(
           
           // Read each note file
           const notesPromises = noteFiles.map(async (file) => {
-            if (!file.name) return null;
+            if (!file.name) {
+              console.log('File has no name:', file);
+              return null;
+            }
             return await readNoteFile(notesPath, file.name);
           });
           
@@ -405,6 +415,32 @@ export const useNotesStore = create<NotesState>()(
       
       // Clear error
       clearError: () => set({ error: null }),
+      
+      // Initialize from storage - called on app startup
+      initializeFromStorage: async () => {
+        // Count initialization attempts without causing re-renders
+        initCounter++;
+        console.log(`Initialization attempt #${initCounter}`);
+        
+        // Skip if already initialized or if already loading
+        if (get().isInitialized || get().isLoading) {
+          return;
+        }
+        
+        const { baseStoragePath, notesPath } = get();
+        
+        // If we have a baseStoragePath from localStorage but no notesPath,
+        // we need to reinitialize the paths
+        if (baseStoragePath && !notesPath) {
+          try {
+            // This will set up notesPath and indexPath, and then load notes
+            await get().setBaseStoragePath(baseStoragePath);
+          } catch (error) {
+            // Keep error logging for troubleshooting
+            console.error('Error initializing from storage:', error);
+          }
+        }
+      },
     }),
     {
       name: "notes-storage",
