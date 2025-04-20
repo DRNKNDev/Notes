@@ -10,11 +10,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 
 export function AppHeader() {
   // Always call hooks at the top level
   const matches = useMatches();
   const routerState = useRouterState();
+  const { isFullscreen } = useFullscreen()
   
   // Get route parameters safely
   const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
@@ -72,6 +74,11 @@ export function AppHeader() {
     }
     return "Notes"; // Default
   };
+
+  // If in fullscreen mode, don't render the header
+  if (isFullscreen) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b border-muted bg-background p-2 z-10">
