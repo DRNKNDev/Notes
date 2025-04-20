@@ -87,11 +87,7 @@ const useTheme = () => {
   };
 
   return { 
-    // For backward compatibility
-    theme: mode, 
-    setTheme: setMode,
-    
-    // New explicit naming
+    // Light/dark mode
     mode, 
     setMode,
     

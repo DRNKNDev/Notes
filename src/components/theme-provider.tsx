@@ -3,8 +3,6 @@ import useTheme, { Theme } from '../hooks/use-theme';
 
 type ThemeContextType = {
   // Light/dark mode
-  theme: Theme; // For backward compatibility
-  setTheme: (theme: Theme) => void; // For backward compatibility
   mode: Theme;
   setMode: (mode: Theme) => void;
   
