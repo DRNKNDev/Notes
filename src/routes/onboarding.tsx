@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import { ThemeSelector, type ThemeOption } from '@/components/theme/theme-selector';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useThemeContext } from '@/components/theme-provider';
-import { FolderOpen, CheckCircle, Moon, Sun, Loader2 } from 'lucide-react';
+import { FolderOpen, Loader2, Moon, Sun } from 'lucide-react';
 import type { Theme } from '@/hooks/use-theme';
 import * as path from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -28,8 +29,10 @@ function OnboardingPage() {
   const [directoryName, setDirectoryName] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<{name: string, url: string}>(themesList[0]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { setMode, mode, setColorTheme, isLoadingTheme } = useThemeContext();
+  const { setMode, mode, setColorTheme } = useThemeContext();
   const navigate = useNavigate();
+  
+
   
   // Get the notes store
   const { 
@@ -82,6 +85,9 @@ function OnboardingPage() {
         const name = await path.basename(selected);
         setDirectoryName(name);
         
+        // Set the storage path in the notes store
+        await setBaseStoragePath(selected);
+        
         setIsProcessing(false);
       } else {
         // User cancelled the dialog
@@ -102,12 +108,14 @@ function OnboardingPage() {
   };
 
   // Handle theme selection
-  const handleThemeSelect = (theme: {name: string, url: string}) => {
+  const handleThemeSelect = (theme: ThemeOption) => {
     setSelectedTheme(theme);
-    if (theme.name.toLowerCase() === 'default') {
+    
+    // Special handling for default theme
+    if (theme.name === 'Default' || theme.url.includes('default-theme.json')) {
       setColorTheme('default');
     } else {
-      setColorTheme(theme.name.toLowerCase(), theme.url);
+      setColorTheme(theme.name, theme.url);
     }
   };
 
@@ -200,34 +208,11 @@ function OnboardingPage() {
                     <div className="font-medium">Theme</div>
                   </div>
                   
-                  {isLoadingTheme ? (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      <span className="ml-2 text-sm">Loading theme...</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {themesList.map(theme => (
-                        <div 
-                          key={theme.url}
-                          className={`p-3 rounded-md border ${selectedTheme.url === theme.url ? 'border-primary bg-accent/50' : 'border-border hover:border-primary/50 cursor-pointer'}`}
-                          onClick={() => handleThemeSelect(theme)}
-                        >
-                          <div className="flex items-center">
-                            {selectedTheme.url === theme.url && (
-                              <CheckCircle className="h-4 w-4 mr-2 text-primary" />
-                            )}
-                            <span className="font-medium">{theme.name}</span>
-                          </div>
-                          <div className="mt-1">
-                            <span className="text-xs text-muted-foreground">
-                              {theme.url.split('/').pop()?.replace('.json', '')}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <ThemeSelector 
+                    themes={themesList} 
+                    selectedTheme={selectedTheme} 
+                    onThemeSelect={handleThemeSelect} 
+                  />
                 </div>
                 
                 <div className="p-4 bg-muted/50 rounded-lg border border-muted">
