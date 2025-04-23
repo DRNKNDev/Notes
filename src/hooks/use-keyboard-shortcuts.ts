@@ -29,9 +29,31 @@ export function useKeyboardShortcuts() {
     if (!currentNoteId) return;
     
     try {
+      // Get all notes to find the next one to navigate to
+      const notes = useNotesStore.getState().notes;
+      const currentIndex = notes.findIndex(note => note.id === currentNoteId);
+      let nextNoteId: string | undefined;
+      
+      if (notes.length > 1) {
+        // If there's a next note, navigate to it
+        if (currentIndex < notes.length - 1) {
+          nextNoteId = notes[currentIndex + 1].id;
+        } 
+        // Otherwise navigate to the previous note
+        else if (currentIndex > 0) {
+          nextNoteId = notes[currentIndex - 1].id;
+        }
+      }
+      
+      // Delete the current note
       await deleteNote(currentNoteId);
-      // Navigate back to notes list
-      navigate({ to: '/notes' });
+      
+      // Navigate to the next note or to the notes list if no other notes
+      if (nextNoteId) {
+        navigate({ to: `/notes/${nextNoteId}` });
+      } else {
+        navigate({ to: '/notes' });
+      }
     } catch (error) {
       console.error("Error deleting note:", error);
     }

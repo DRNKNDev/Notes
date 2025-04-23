@@ -216,22 +216,40 @@ function NoteView() {
     }
   };
   
-  // Delete the current note
+  // Handle note deletion
   const handleDelete = async () => {
     if (!note) return;
     
+    // Set deleting state
+    setIsDeleting(true);
     try {
-      setIsDeleting(true);
+      // Find the next note to navigate to
+      const currentIndex = notes.findIndex(n => n.id === note.id);
+      let nextNoteId: string | undefined;
+      
+      if (notes.length > 1) {
+        // If there's a next note, navigate to it
+        if (currentIndex < notes.length - 1) {
+          nextNoteId = notes[currentIndex + 1].id;
+        } 
+        // Otherwise navigate to the previous note
+        else if (currentIndex > 0) {
+          nextNoteId = notes[currentIndex - 1].id;
+        }
+      }
+      
+      // Delete the current note
       await deleteNote(note.id);
-      toast.success("Note deleted successfully", {
-        description: "The note has been permanently removed"
-      });
-      navigate({ to: '/notes', search: {} });
-    } catch (error) {
-      console.error("Error deleting note:", error);
-      toast.error("Failed to delete note", {
-        description: "Please try again or check console for details"
-      });
+      
+      // Navigate to the next note or to the notes list if no other notes
+      if (nextNoteId) {
+        navigate({ to: `/notes/${nextNoteId}` });
+      } else {
+        navigate({ to: '/notes' });
+      }
+    } catch (err) {
+      console.error('Failed to delete note:', err);
+    } finally {
       setIsDeleting(false);
     }
   };
