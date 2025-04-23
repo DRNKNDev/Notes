@@ -271,23 +271,25 @@ function SettingsPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           type="button"
-                          variant={mode === "light" ? "default" : "outline"}
+                          variant={mode === "light" ? "default" : "ghost"}
                           className="h-auto flex flex-col items-center justify-center p-3 gap-2"
                           onClick={() => setMode("light")}
                         >
-                          <div className="w-full h-12 rounded-md bg-background border border-border flex items-center justify-center">
-                            <span className="text-xs">A</span>
+                          {/* Fixed light theme preview with explicit colors */}
+                          <div className="w-full h-12 rounded-md bg-white flex items-center justify-center">
+                            <span className="text-xs text-slate-900">A</span>
                           </div>
                           <span className="text-xs font-medium">Light</span>
                         </Button>
                         
                         <Button
                           type="button"
-                          variant={mode === "dark" ? "default" : "outline"}
+                          variant={mode === "dark" ? "default" : "ghost"}
                           className="h-auto flex flex-col items-center justify-center p-3 gap-2"
                           onClick={() => setMode("dark")}
                         >
-                          <div className="w-full h-12 rounded-md bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                          {/* Fixed dark theme preview */}
+                          <div className="w-full h-12 rounded-md bg-zinc-800 flex items-center justify-center">
                             <span className="text-xs text-zinc-200">A</span>
                           </div>
                           <span className="text-xs font-medium">Dark</span>
