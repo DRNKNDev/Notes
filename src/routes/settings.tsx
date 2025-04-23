@@ -163,25 +163,6 @@ function SettingsPage() {
                 </div>
                 <div className="sm:max-w-3xl md:col-span-2">
                   <div className="space-y-4">
-                    <div className="mb-6">
-                      <Label
-                        htmlFor="editor-font-size"
-                        className="text-sm font-medium text-foreground"
-                      >
-                        Editor Font Size
-                      </Label>
-                      <Select name="editor-font-size" defaultValue="medium" disabled>
-                        <SelectTrigger id="editor-font-size" className="mt-2">
-                          <SelectValue placeholder="Select font size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="small">Small</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="large">Large</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
                     <div className="flex items-center gap-x-3">
                       <Checkbox id="use-native-fullscreen" name="use-native-fullscreen" defaultChecked disabled />
                       <Label
