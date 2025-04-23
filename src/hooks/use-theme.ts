@@ -10,14 +10,30 @@ const useTheme = () => {
   const [mode, setModeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return 'light'; // Default for SSR/initial render
     
-    // Try to get from localStorage, fallback to browser preference, then light
+    // First check if a theme class is already applied to the document element
+    // This would have been set by our inline script in index.html
+    const htmlEl = document.documentElement;
+    if (htmlEl.classList.contains('dark')) {
+      return 'dark';
+    } else if (htmlEl.classList.contains('light')) {
+      return 'light';
+    }
+    
+    // If no class is applied yet, try localStorage
     const storedMode = localStorage.getItem('theme-mode') as Theme | null;
     if (storedMode === 'light' || storedMode === 'dark') {
       return storedMode;
     }
     
-    // Check system preference if no valid stored mode
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Last resort: Check system preference if no valid stored mode
+    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Store the system preference in localStorage for future use
+    try {
+      localStorage.setItem('theme-mode', systemPreference);
+    } catch (e) {
+      console.error("Failed to set initial theme mode in localStorage", e);
+    }
+    return systemPreference;
   });
   
   // Use the color theme manager for theme colors
@@ -65,7 +81,10 @@ const useTheme = () => {
 
   // Apply mode when it changes
   useEffect(() => {
+    // Apply the theme immediately
     applyMode(mode);
+    
+    // Update localStorage with the current theme
     try {
       localStorage.setItem('theme-mode', mode);
       console.log(`Stored theme mode preference: ${mode}`);
