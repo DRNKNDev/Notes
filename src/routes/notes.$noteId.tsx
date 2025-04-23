@@ -26,7 +26,9 @@ function NoteView() {
     saveNote, 
     deleteNote, 
     isLoading, 
-    error 
+    error,
+    isInitialized,
+    initializeFromStorage
   } = useNotesStore();
   
   // State for tracking if we're currently saving
@@ -34,8 +36,8 @@ function NoteView() {
   const [isDeleting, setIsDeleting] = useState(false);
   
   // State for the combined markdown content in the editor
-  // Initialize with empty string to prevent unmount on ID change
-  const [editorMarkdown, setEditorMarkdown] = useState<string>('');
+  // Initialize with null to indicate loading state
+  const [editorMarkdown, setEditorMarkdown] = useState<string | null>(null);
   
   // State for the current note title
   const [currentTitle, setCurrentTitle] = useState<string>('');
@@ -51,10 +53,29 @@ function NoteView() {
   // Find the note with the matching ID
   const note = notes.find(note => note.id === noteId) as Note | undefined;
   
+  // Ensure the notes store is initialized
+  useEffect(() => {
+    if (!isInitialized && !isLoading) {
+      initializeFromStorage();
+    }
+  }, [isInitialized, isLoading, initializeFromStorage]);
+
   // Initialize editor markdown when noteId changes
   useEffect(() => {
     // Skip if we've already loaded this note
     if (loadedNoteIdRef.current === noteId) return;
+    
+    // Skip if notes aren't loaded yet or if we're still loading
+    if (!isInitialized || isLoading) {
+      console.log('Skipping note load - store not initialized yet');
+      return;
+    }
+    
+    // Skip if note is not found
+    if (!note) {
+      console.log('Skipping note load - note not found:', noteId);
+      return;
+    }
     
     // Reset initial load flag
     isInitialLoadCompleteRef.current = false;
@@ -62,33 +83,33 @@ function NoteView() {
     // Reset state when noteId changes - KEEP editorMarkdown to prevent unmount
     setCurrentTitle('');
     
-    if (note) {
-      // Mark this note as loaded
-      loadedNoteIdRef.current = noteId;
-      
-      // Construct initial editor markdown
-      const initialTitle = note.title || 'Untitled';
-      
-      // Check if bodyContent already starts with a title
-      let initialContent = note.bodyContent || '';
-      
-      // Ensure consistent line endings (convert CRLF to LF)
-      initialContent = initialContent.replace(/\r\n/g, '\n');
-      
-      // Remove any existing H1 header to prevent duplication
-      if (initialContent.trim().startsWith('# ')) {
-        // Content already has a header, use it as is
-        const initialMarkdown = initialContent;
-        setEditorMarkdown(initialMarkdown);
-      } else {
-        // Content doesn't have a header, add one
-        const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
-        setEditorMarkdown(initialMarkdown);
-      }
-      
-      setCurrentTitle(initialTitle);
+    // Mark this note as loaded
+    loadedNoteIdRef.current = noteId;
+    
+    // Construct initial editor markdown
+    const initialTitle = note.title || 'Untitled';
+    
+    // Check if bodyContent already starts with a title
+    let initialContent = note.bodyContent || '';
+    
+    // Ensure consistent line endings (convert CRLF to LF)
+    initialContent = initialContent.replace(/\r\n/g, '\n');
+    
+    console.log('Loading note content, length:', initialContent.length);
+    
+    // Remove any existing H1 header to prevent duplication
+    if (initialContent.trim().startsWith('# ')) {
+      // Content already has a header, use it as is
+      const initialMarkdown = initialContent;
+      setEditorMarkdown(initialMarkdown);
+    } else {
+      // Content doesn't have a header, add one
+      const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
+      setEditorMarkdown(initialMarkdown);
     }
-  }, [noteId, note]); // Include note to ensure we have the latest data
+    
+    setCurrentTitle(initialTitle);
+  }, [noteId, note, isInitialized, isLoading]); // Include initialization state
 
   // Auto-save effect
   useEffect(() => {
@@ -157,6 +178,8 @@ function NoteView() {
   const handleEditorChange = (newMarkdown: string) => {
     // Update the editor markdown state
     setEditorMarkdown(newMarkdown);
+    // For debugging
+    console.log('Editor content changed, length:', newMarkdown.length);
   };
   
   // Handle title changes separately
@@ -251,8 +274,12 @@ function NoteView() {
           "min-h-full",
           isFullscreen ? "p-40 pt-20" : "px-6 pb-20"
         )}>
-          {/* Keep editor mounted if note exists and is loaded, even if markdown is temporarily empty during transition */}
-          {note && loadedNoteIdRef.current === noteId ? (
+          {/* Show loading indicator if notes aren't initialized yet */}
+          {!isInitialized || isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : note && loadedNoteIdRef.current === noteId && editorMarkdown !== null ? (
             <NoteEditor 
               markdown={editorMarkdown} // Pass combined markdown
               onChange={handleEditorChange} // Pass the content change handler
