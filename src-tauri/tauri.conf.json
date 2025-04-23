@@ -33,6 +33,20 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": true,
+    "publisher": "DRNKNDev",
+    "category": "Productivity",
+    "copyright": "© 2025 DRNKNDev"
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "http://localhost:8000/{{target}}/{{current_version}}"
+      ],
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZCODU4NzE0NzUwRDY2QkQKUldTOVpnMTFGSWVGYXl0eE80Y3Fma1hYSVVQRXZoZnNZeHBIY0dSNnp0VVE1aXMvL21Pa0p0NksK"
+    }
   }
 }
