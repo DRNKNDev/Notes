@@ -2,28 +2,29 @@ import { EditorView } from '@codemirror/view'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags as t } from '@lezer/highlight'
 
-// Define Tailwind colors (adjust based on your global.css or tailwind.config.js)
+// Define Tailwind colors using Tailwind v4's built-in CSS variables
 const twColors = {
-  bg: 'var(--background)', // Example: use CSS variables defined in global.css
+  bg: 'var(--background)',
   fg: 'var(--foreground)',
   mutedFg: 'var(--muted-foreground)',
   accent: 'var(--accent)',
   accentFg: 'var(--accent-foreground)',
   border: 'var(--border)',
-  selectionBg: 'var(--accent)', // Or a specific selection color
-  comment: 'var(--muted-foreground)',
-  keyword: 'hsl(var(--primary))', // Example: Use HSL values if needed
-  string: 'hsl(var(--secondary))',
-  number: 'hsl(var(--destructive))',
-  variableName: 'hsl(var(--foreground))',
-  className: 'hsl(var(--accent))',
-  tag: 'hsl(var(--primary))',
-  attributeName: 'hsl(var(--secondary))',
-  propertyName: 'hsl(var(--foreground))',
-  punctuation: 'hsl(var(--muted-foreground))',
-  operator: 'hsl(var(--muted-foreground))',
-  invalid: 'hsl(var(--destructive))',
-  lineHighlightBg: 'rgba(128, 128, 128, 0.1)', // Example: subtle highlight
+  selectionBg: 'var(--accent)',
+  // Syntax highlighting colors using Tailwind v4 CSS variables
+  comment: 'var(--color-slate-400)',
+  keyword: 'var(--color-violet-500)',
+  string: 'var(--color-emerald-500)',
+  number: 'var(--color-orange-500)',
+  variableName: 'var(--color-sky-500)',
+  className: 'var(--color-pink-500)',
+  tag: 'var(--color-indigo-500)',
+  attributeName: 'var(--color-teal-500)',
+  propertyName: 'var(--color-blue-500)',
+  punctuation: 'var(--color-slate-500)',
+  operator: 'var(--color-purple-600)',
+  invalid: 'var(--color-red-500)',
+  lineHighlightBg: 'rgba(128, 128, 128, 0.1)',
   gutterBg: 'var(--background)',
   gutterFg: 'var(--muted-foreground)',
   gutterActiveFg: 'var(--foreground)',
