@@ -114,7 +114,7 @@ export function AppSidebarSecondary({
           <SidebarContent>
             <ScrollArea className="h-full">
               <SidebarGroup>
-                <SidebarGroupContent>
+                <SidebarGroupContent className="flex flex-col gap-2">
                   {searchQuery ? (
                     // Show search results
                     searchResults.length > 0 ? (
