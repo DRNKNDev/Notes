@@ -247,7 +247,7 @@ function NoteView() {
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleFullscreen}
-                className="h-8 w-8" // Added size class
+                className="h-8 w-8 bg-sidebar" // Added size class
               >
                 {isFullscreen ? <MinimizeIcon className="h-4 w-4" /> : <Maximize2Icon className="h-4 w-4" />}
               </Button>
@@ -293,7 +293,7 @@ function NoteView() {
                 size="icon"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                className="text-destructive bg-sidebar hover:bg-destructive/10 h-8 w-8"
               >
                 {isDeleting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
