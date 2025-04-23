@@ -55,9 +55,8 @@ export async function ensureNotesDirectory(
       // Create directory with parent directories
       // Tauri 2 uses mkdir instead of createDir
       await fs.mkdir(notesPath, { recursive: true });
-      console.log(`Notes directory created at: ${notesPath}`);
     } else {
-      console.log(`Notes directory already exists at: ${notesPath}`);
+      // Directory already exists
     }
   } catch (error) {
     console.error("Error ensuring notes directory:", error);

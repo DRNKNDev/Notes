@@ -67,13 +67,11 @@ function NoteView() {
     
     // Skip if notes aren't loaded yet or if we're still loading
     if (!isInitialized || isLoading) {
-      console.log('Skipping note load - store not initialized yet');
       return;
     }
     
     // Skip if note is not found
     if (!note) {
-      console.log('Skipping note load - note not found:', noteId);
       return;
     }
     
@@ -94,8 +92,6 @@ function NoteView() {
     
     // Ensure consistent line endings (convert CRLF to LF)
     initialContent = initialContent.replace(/\r\n/g, '\n');
-    
-    console.log('Loading note content, length:', initialContent.length);
     
     // Remove any existing H1 header to prevent duplication
     if (initialContent.trim().startsWith('# ')) {
@@ -178,8 +174,6 @@ function NoteView() {
   const handleEditorChange = (newMarkdown: string) => {
     // Update the editor markdown state
     setEditorMarkdown(newMarkdown);
-    // For debugging
-    console.log('Editor content changed, length:', newMarkdown.length);
   };
   
   // Handle title changes separately

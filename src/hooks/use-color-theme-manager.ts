@@ -81,13 +81,13 @@ const applyThemeVariables = (theme: ColorTheme) => {
   for (const [key, value] of Object.entries(darkColors)) {
     const cssVar = `--${key}`;
     if (!PROTECTED_VARIABLES.has(cssVar)) {
-      darkStyles += `${cssVar}: ${value}; `; // Added space for clarity
+      darkStyles += `${cssVar}: ${value}; `; 
     }
   }
   darkStyles += '}';
   darkStyleSheet.textContent = darkStyles;
 
-  console.log(`Applied theme: ${theme.name} (Dark mode: ${isDarkMode})`);
+  // Applied theme: ${theme.name} (Dark mode: ${isDarkMode})
 };
 
 // Custom hook for managing color themes
@@ -117,7 +117,6 @@ export const useColorThemeManager = () => {
   const loadTheme = useCallback(async (key: string, url?: string | null) => {
     // Prevent infinite loops if we're already applying a theme
     if (isApplyingThemeRef.current) {
-      console.log('Already applying theme, skipping loadTheme call');
       return;
     }
     

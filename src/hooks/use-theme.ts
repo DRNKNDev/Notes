@@ -75,8 +75,6 @@ const useTheme = () => {
         }, 100);
       }
     }
-    
-    console.log(`Applied mode: ${selectedMode}`);
   }, [currentTheme, currentThemeKey, currentThemeUrl, loadTheme]);
 
   // Apply mode when it changes
@@ -87,7 +85,6 @@ const useTheme = () => {
     // Update localStorage with the current theme
     try {
       localStorage.setItem('theme-mode', mode);
-      console.log(`Stored theme mode preference: ${mode}`);
     } catch (e) {
       console.error("Failed to set theme mode in localStorage", e);
     }

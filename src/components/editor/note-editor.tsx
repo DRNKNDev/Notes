@@ -21,13 +21,11 @@ import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
  */
 function normalizeMarkdown(content: string | null | undefined): string {
   if (content === null || content === undefined) {
-    console.warn('normalizeMarkdown called with null/undefined content');
     return '# Default Note\n\nStart writing here...\n';
   }
   
   // Handle empty string case differently
   if (content === '') {
-    console.warn('normalizeMarkdown called with empty string');
     return '\n';
   }
   
@@ -64,14 +62,7 @@ export function NoteEditor({
   // Use a ref to track if we're currently handling an update to prevent circular updates
   const isUpdatingRef = useRef(false);
   
-  // Debug the incoming markdown prop
-  useEffect(() => {
-    if (markdown === null) {
-      console.warn('NoteEditor received null markdown');
-    } else if (markdown === '') {
-      console.warn('NoteEditor received empty string markdown');
-    }
-  }, [markdown]);
+
   
   // Use useMemo to properly memoize the normalized markdown
   // This ensures normalizeMarkdown is only called when markdown actually changes
