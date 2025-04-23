@@ -11,12 +11,14 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { useNotesStore } from "@/lib/notes/notes-store";
 
 export function AppHeader() {
   // Always call hooks at the top level
   const matches = useMatches();
   const routerState = useRouterState();
   const { isFullscreen } = useFullscreen()
+  const { notes } = useNotesStore()
   
   // Get route parameters safely
   const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
@@ -126,7 +128,12 @@ export function AppHeader() {
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs">
-                  {getRouteTitle()}
+                  {routePath.startsWith("/notes") && noteId ? (
+                    // Find the actual note title
+                    notes.find(note => note.id === noteId)?.title || "Note"
+                  ) : (
+                    getRouteTitle()
+                  )}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </>

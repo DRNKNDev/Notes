@@ -1,9 +1,3 @@
----
-title: Welcome to DRNKN Notes!
-date: 2025-04-17
-tags: [markdown, guide]
----
-
 This is a quick guide to help you get started with the core features.
 
 ## Formatting (Markdown)
