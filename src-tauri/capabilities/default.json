@@ -22,9 +22,14 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        { "path": "$HOME/**" },
-        { "path": "$DOCUMENT/**" }
+        {
+          "path": "$HOME/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        }
       ]
-    }
+    },
+    "process:default"
   ]
 }
