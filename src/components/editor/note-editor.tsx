@@ -110,11 +110,14 @@ export function NoteEditor({
       window.clearTimeout(debounceTimeoutRef.current);
     }
     
-    // Set a new timeout
+    // Use a longer debounce time for title edits
+    const isEditingTitle = newMarkdown.match(/^#\s+[^\n]*$/m) !== null;
+    const debounceTime = isEditingTitle ? 2000 : 500;
+    
     debounceTimeoutRef.current = window.setTimeout(() => {
       processMarkdownChange(latestMarkdownRef.current);
       debounceTimeoutRef.current = null;
-    }, 500); // 500ms debounce delay
+    }, debounceTime);
   }, [processMarkdownChange]);
   
   // Clean up the timeout on unmount
@@ -140,7 +143,6 @@ export function NoteEditor({
       markdown={safeMarkdown}
       onChange={handleMarkdownChange}
       onError={handleError}
-      autoFocus
       plugins={
         [
           headingsPlugin(),
