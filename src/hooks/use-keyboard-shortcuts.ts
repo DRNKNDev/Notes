@@ -6,7 +6,12 @@ import { useFullscreen } from "./use-fullscreen";
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
   const { toggleFullscreen } = useFullscreen();
-  const { createNote } = useNotesStore();
+  const { createNote, deleteNote } = useNotesStore();
+  
+  // Current note ID from the URL
+  const pathname = window.location.pathname;
+  const noteIdMatch = pathname.match(/\/notes\/([^/]+)$/);
+  const currentNoteId = noteIdMatch ? noteIdMatch[1] : undefined;
 
   // Handler for creating a new note
   const handleCreateNewNote = async () => {
@@ -18,6 +23,19 @@ export function useKeyboardShortcuts() {
       console.error("Error creating new note:", error);
     }
   };
+  
+  // Handler for deleting the current note
+  const handleDeleteNote = async () => {
+    if (!currentNoteId) return;
+    
+    try {
+      await deleteNote(currentNoteId);
+      // Navigate back to notes list
+      navigate({ to: '/notes' });
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -26,6 +44,16 @@ export function useKeyboardShortcuts() {
         event.preventDefault();
         toggleFullscreen();
         return;
+      }
+      
+      // Check for Command + Delete for deleting current note
+      if (event.metaKey && !event.ctrlKey && event.key === 'Backspace') {
+        // Only if we're on a note detail page
+        if (currentNoteId) {
+          event.preventDefault();
+          handleDeleteNote();
+          return;
+        }
       }
       
       // Check if Command (Meta) key is pressed (without Control)
@@ -73,5 +101,5 @@ export function useKeyboardShortcuts() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigate, toggleFullscreen, handleCreateNewNote]);
+  }, [navigate, toggleFullscreen, handleCreateNewNote, handleDeleteNote, currentNoteId]);
 }

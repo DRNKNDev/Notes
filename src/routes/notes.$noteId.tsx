@@ -305,6 +305,7 @@ function NoteView() {
             <TooltipContent side="top">
               <div className="flex items-center justify-between">
                 <p>Delete Note</p>
+                <span className="text-xs text-muted ml-2 font-mono">⌘⌫</span> 
               </div>
             </TooltipContent>
           </Tooltip>
