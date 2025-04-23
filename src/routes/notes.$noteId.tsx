@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Loader2, Trash, Maximize2Icon, MinimizeIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useNoteActions } from '@/hooks/use-note-actions';
 
 // This route handles displaying a specific note by its ID
 export const Route = createFileRoute('/notes/$noteId')({  
@@ -24,7 +25,6 @@ function NoteView() {
   const { 
     notes, 
     saveNote, 
-    deleteNote, 
     isLoading, 
     error,
     isInitialized,
@@ -33,7 +33,9 @@ function NoteView() {
   
   // State for tracking if we're currently saving
   const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Get note actions from the centralized hook
+  const { deleteNoteAndNavigate, isDeleting } = useNoteActions();
   
   // State for the combined markdown content in the editor
   // Initialize with null to indicate loading state
@@ -216,42 +218,10 @@ function NoteView() {
     }
   };
   
-  // Handle note deletion
+  // Handle note deletion using the centralized action
   const handleDelete = async () => {
     if (!note) return;
-    
-    // Set deleting state
-    setIsDeleting(true);
-    try {
-      // Find the next note to navigate to
-      const currentIndex = notes.findIndex(n => n.id === note.id);
-      let nextNoteId: string | undefined;
-      
-      if (notes.length > 1) {
-        // If there's a next note, navigate to it
-        if (currentIndex < notes.length - 1) {
-          nextNoteId = notes[currentIndex + 1].id;
-        } 
-        // Otherwise navigate to the previous note
-        else if (currentIndex > 0) {
-          nextNoteId = notes[currentIndex - 1].id;
-        }
-      }
-      
-      // Delete the current note
-      await deleteNote(note.id);
-      
-      // Navigate to the next note or to the notes list if no other notes
-      if (nextNoteId) {
-        navigate({ to: `/notes/${nextNoteId}` });
-      } else {
-        navigate({ to: '/notes' });
-      }
-    } catch (err) {
-      console.error('Failed to delete note:', err);
-    } finally {
-      setIsDeleting(false);
-    }
+    await deleteNoteAndNavigate(note.id);
   };
 
   return (
