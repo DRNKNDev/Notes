@@ -271,7 +271,7 @@ function SettingsPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           type="button"
-                          variant={mode === "light" ? "default" : "ghost"}
+                          variant={mode === "light" ? "default" : "outline"}
                           className="h-auto flex flex-col items-center justify-center p-3 gap-2"
                           onClick={() => setMode("light")}
                         >
@@ -284,7 +284,7 @@ function SettingsPage() {
                         
                         <Button
                           type="button"
-                          variant={mode === "dark" ? "default" : "ghost"}
+                          variant={mode === "dark" ? "default" : "outline"}
                           className="h-auto flex flex-col items-center justify-center p-3 gap-2"
                           onClick={() => setMode("dark")}
                         >
