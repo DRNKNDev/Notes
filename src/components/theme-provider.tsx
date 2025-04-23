@@ -1,10 +1,18 @@
 import React, { createContext, useContext } from 'react';
-import useTheme, { Theme, EffectiveTheme } from '../hooks/use-theme'; // Adjust path if needed
+import useTheme, { Theme } from '../hooks/use-theme';
 
 type ThemeContextType = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  effectiveTheme: EffectiveTheme;
+  // Light/dark mode
+  mode: Theme;
+  setMode: (mode: Theme) => void;
+  
+  // Color theme
+  colorTheme: any | null;
+  isLoadingTheme: boolean;
+  themeError: string | null;
+  setColorTheme: (key: string, url?: string | null) => void;
+  currentThemeKey: string;
+  currentThemeUrl: string | null;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);

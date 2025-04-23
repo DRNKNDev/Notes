@@ -1,80 +1,105 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useColorThemeManager } from './use-color-theme-manager';
 
-type Theme = 'light' | 'dark' | 'system';
-type EffectiveTheme = 'light' | 'dark';
+type Theme = 'light' | 'dark';
+
+// We'll define theme options in themes.json
 
 const useTheme = () => {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'system'; // Default for SSR/initial render
-    const storedTheme = localStorage.getItem('theme') as Theme | null;
-    return storedTheme || 'system';
+  // Mode state (light/dark only, no system)
+  const [mode, setModeState] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'light'; // Default for SSR/initial render
+    
+    // Try to get from localStorage, fallback to browser preference, then light
+    const storedMode = localStorage.getItem('theme-mode') as Theme | null;
+    if (storedMode === 'light' || storedMode === 'dark') {
+      return storedMode;
+    }
+    
+    // Check system preference if no valid stored mode
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
-  const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>('light');
+  
+  // Use the color theme manager for theme colors
+  const { 
+    currentTheme, 
+    isLoading, 
+    error, 
+    loadTheme, 
+    currentThemeKey,
+    currentThemeUrl 
+  } = useColorThemeManager();
 
-  const applyTheme = useCallback((selectedTheme: Theme) => {
+  // Track if we're currently in the middle of applying a theme to prevent loops
+  const isApplyingThemeRef = useRef(false);
+  
+  // Apply light/dark mode classes
+  const applyMode = useCallback((selectedMode: Theme) => {
+    // Prevent infinite loops
+    if (isApplyingThemeRef.current) {
+      console.log('Already applying theme, skipping mode change');
+      return;
+    }
+    
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
-
-    let currentEffectiveTheme: EffectiveTheme;
-
-    if (selectedTheme === 'system') {
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      currentEffectiveTheme = systemPrefersDark ? 'dark' : 'light';
-    } else {
-      currentEffectiveTheme = selectedTheme;
-    }
-
-    root.classList.add(currentEffectiveTheme);
-    setEffectiveTheme(currentEffectiveTheme); // Update effective theme state
-    console.log(`Applied theme: ${currentEffectiveTheme} (Selected: ${selectedTheme})`); // Added for debugging
-  }, []);
-
-  useEffect(() => {
-    applyTheme(theme);
-    try {
-      localStorage.setItem('theme', theme);
-      console.log(`Stored theme preference: ${theme}`); // Added for debugging
-    } catch (e) {
-      console.error("Failed to set theme in localStorage", e);
-    }
-  }, [theme, applyTheme]);
-
-  // Listener for system theme changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const handleChange = () => {
-        console.log("System theme changed, re-applying theme if set to 'system'"); // Added for debugging
-      if (theme === 'system') {
-        applyTheme('system');
+    root.classList.add(selectedMode);
+    
+    // Trigger a re-application of the current theme to ensure variables are applied correctly
+    if (currentTheme) {
+      try {
+        isApplyingThemeRef.current = true;
+        // Apply theme variables directly without going through loadTheme
+        // This prevents the circular dependency
+        loadTheme(currentThemeKey, currentThemeUrl);
+      } finally {
+        // Always reset the flag when done
+        setTimeout(() => {
+          isApplyingThemeRef.current = false;
+        }, 100);
       }
-    };
-
-    // Check if addEventListener is supported
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
-    } else if (mediaQuery.addListener) { // Deprecated but fallback
-        mediaQuery.addListener(handleChange);
     }
+    
+    console.log(`Applied mode: ${selectedMode}`);
+  }, [currentTheme, currentThemeKey, currentThemeUrl, loadTheme]);
 
+  // Apply mode when it changes
+  useEffect(() => {
+    applyMode(mode);
+    try {
+      localStorage.setItem('theme-mode', mode);
+      console.log(`Stored theme mode preference: ${mode}`);
+    } catch (e) {
+      console.error("Failed to set theme mode in localStorage", e);
+    }
+  }, [mode, applyMode]);
 
-    // Cleanup listener on unmount
-    return () => {
-        if (mediaQuery.removeEventListener) {
-          mediaQuery.removeEventListener('change', handleChange);
-        } else if (mediaQuery.removeListener) { // Deprecated but fallback
-          mediaQuery.removeListener(handleChange);
-        }
-    };
-  }, [theme, applyTheme]); // Re-run if theme preference changes to/from system
+  // We no longer need to listen for system theme changes since we don't have a 'system' mode
 
-
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+  // Set mode (light/dark/system)
+  const setMode = (newMode: Theme) => {
+    setModeState(newMode);
   };
 
-  return { theme, setTheme, effectiveTheme };
+  // Change color theme by key and URL
+  const setColorTheme = (key: string, url?: string | null) => {
+    loadTheme(key, url);
+  };
+
+  return { 
+    // Light/dark mode
+    mode, 
+    setMode,
+    
+    // Color theme properties
+    colorTheme: currentTheme,
+    isLoadingTheme: isLoading,
+    themeError: error,
+    setColorTheme,
+    currentThemeKey,
+    currentThemeUrl
+  };
 };
 
 export default useTheme;
-export type { Theme, EffectiveTheme }; // Export Theme and EffectiveTheme types
+export type { Theme }; // Only export Theme type

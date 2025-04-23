@@ -1,6 +1,25 @@
 import { cn } from "@/lib/utils"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 
+// Add TypeScript definitions for Intl.Segmenter which might be missing
+interface Segment {
+  segment: string;
+  index: number;
+  input: string;
+  isWordLike?: boolean;
+}
+
+interface Segmenter {
+  segment(input: string): Iterable<Segment>;
+}
+
+// Augment the Intl namespace if Segmenter is not defined
+declare namespace Intl {
+  const Segmenter: {
+    new (locale: string, options?: { granularity: "word" | "sentence" | "grapheme" }): Segmenter;
+  };
+}
+
 export type Mode = "typewriter" | "fade"
 
 export type UseTextStreamOptions = {
@@ -110,17 +129,23 @@ function useTextStream({
   const updateSegments = useCallback((text: string) => {
     if (modeRef.current === "fade") {
       try {
-        const segmenter = new Intl.Segmenter(navigator.language, {
-          granularity: "word",
-        })
-        const segmentIterator = segmenter.segment(text)
-        const newSegments = Array.from(segmentIterator).map(
-          (segment, index) => ({
-            text: segment.segment,
-            index,
+        // Check if Intl.Segmenter is available
+        if (typeof Intl.Segmenter === 'function') {
+          const segmenter = new Intl.Segmenter(navigator.language, {
+            granularity: "word",
           })
-        )
-        setSegments(newSegments)
+          const segmentIterator = segmenter.segment(text)
+          const newSegments = Array.from(segmentIterator).map(
+            (segment: any, index: number) => ({
+              text: segment.segment,
+              index,
+            })
+          )
+          setSegments(newSegments)
+          return;
+        }
+        // Fallback if Segmenter is not available
+        throw new Error('Intl.Segmenter not supported');
       } catch (error) {
         const newSegments = text
           .split(/(\s+)/)

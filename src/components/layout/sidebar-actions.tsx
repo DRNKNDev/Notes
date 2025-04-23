@@ -1,25 +1,21 @@
 import { Moon, Settings, Sun } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import useTheme from "@/hooks/use-theme";
+import { useThemeContext } from "@/components/theme-provider";
 import { Link } from "@tanstack/react-router";
 
 export function SidebarActions() {
 
-  const { theme, setTheme, effectiveTheme } = useTheme();
+  const { mode, setMode } = useThemeContext();
 
   const handleThemeChange = () => {
-    // Toggle between light and dark only (no system theme)
-    if (theme === 'light') {
-      setTheme('dark');
-    } else {
-      setTheme('light');
-    }
+    // Toggle between light and dark only
+    setMode(mode === 'light' ? 'dark' : 'light');
   };
 
   const getThemeLabel = () => {
     // Only light and dark themes
-    return theme === 'light' ? "Light Theme" : "Dark Theme";
+    return mode === 'light' ? "Light Theme" : "Dark Theme";
   };
 
   return (
@@ -32,7 +28,7 @@ export function SidebarActions() {
               onClick={handleThemeChange} 
               className="justify-start w-full"
             >
-              {effectiveTheme === 'dark' ? (
+              {mode === 'dark' ? (
                 <Moon className="size-4 mr-2" />
               ) : (
                 <Sun className="size-4 mr-2" />

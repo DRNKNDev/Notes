@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import { ThemeSelector, type ThemeOption } from '@/components/theme/theme-selector';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useThemeContext } from '@/components/theme-provider';
-import { FolderOpen, CheckCircle, Moon, Sun, Loader2 } from 'lucide-react';
+import { FolderOpen, Loader2, Moon, Sun } from 'lucide-react';
 import type { Theme } from '@/hooks/use-theme';
 import * as path from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useNotesStore } from '@/lib/notes/notes-store';
 import { toast } from 'sonner';
+
+// Import themes list
+import themesList from '@/assets/themes.json';
 
 // Define the onboarding steps
 type OnboardingStep = 'directory' | 'theme';
@@ -24,10 +27,12 @@ function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('directory');
   const [directoryPath, setDirectoryPath] = useState<string>('');
   const [directoryName, setDirectoryName] = useState<string>('');
-  const [selectedTheme, setSelectedTheme] = useState<string>('zinc');
+  const [selectedTheme, setSelectedTheme] = useState<{name: string, url: string}>(themesList[0]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { setTheme, effectiveTheme } = useThemeContext();
+  const { setMode, mode, setColorTheme } = useThemeContext();
   const navigate = useNavigate();
+  
+
   
   // Get the notes store
   const { 
@@ -80,6 +85,9 @@ function OnboardingPage() {
         const name = await path.basename(selected);
         setDirectoryName(name);
         
+        // Set the storage path in the notes store
+        await setBaseStoragePath(selected);
+        
         setIsProcessing(false);
       } else {
         // User cancelled the dialog
@@ -100,10 +108,15 @@ function OnboardingPage() {
   };
 
   // Handle theme selection
-  const handleThemeSelect = (theme: string) => {
+  const handleThemeSelect = (theme: ThemeOption) => {
     setSelectedTheme(theme);
-    // Cast to 'light' | 'dark' | 'system' as required by the setTheme function
-    setTheme(theme as Theme);
+    
+    // Special handling for default theme
+    if (theme.name === 'Default' || theme.url.includes('default-theme.json')) {
+      setColorTheme('default');
+    } else {
+      setColorTheme(theme.name, theme.url);
+    }
   };
 
   // Handle completing onboarding
@@ -133,15 +146,6 @@ function OnboardingPage() {
       setIsProcessing(false);
     }
   };
-
-  // Available themes
-  const themes = [
-    { name: 'zinc', label: 'Zinc' },
-    { name: 'slate', label: 'Slate' },
-    { name: 'stone', label: 'Stone' },
-    { name: 'gray', label: 'Gray' },
-    { name: 'neutral', label: 'Neutral' },
-  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background">
@@ -174,8 +178,9 @@ function OnboardingPage() {
                     {directoryPath ? (
                       <div className="flex flex-col gap-2">
                         <div className="p-3 bg-background rounded-md border border-border flex items-center">
-                          <div className="flex-1 truncate text-sm">
-                            {directoryPath}
+                          <div className="flex-1">
+                            <div className="font-medium">{directoryName}</div>
+                            <div className="text-xs text-muted-foreground truncate">{directoryPath}</div>
                           </div>
                           <Button variant="ghost" size="sm" onClick={handleDirectorySelect} className="ml-2">
                             Change
@@ -200,36 +205,26 @@ function OnboardingPage() {
               <div className="space-y-6">
                 <div className="p-4 bg-muted/50 rounded-lg border border-muted">
                   <div className="flex items-center mb-4">
-                    <div className="h-5 w-5 mr-2 bg-primary rounded-full"></div>
-                    <h3 className="font-medium">Choose a Theme</h3>
+                    <div className="font-medium">Theme</div>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {themes.map((theme) => (
-                      <Button
-                        key={theme.name}
-                        variant={selectedTheme === theme.name ? "default" : "outline"}
-                        className={`justify-start h-auto py-2 ${selectedTheme === theme.name ? 'border-primary' : ''}`}
-                        onClick={() => handleThemeSelect(theme.name)}
-                      >
-                        {selectedTheme === theme.name && (
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                        )}
-                        {theme.label}
-                      </Button>
-                    ))}
-                  </div>
+                  
+                  <ThemeSelector 
+                    themes={themesList} 
+                    selectedTheme={selectedTheme} 
+                    onThemeSelect={handleThemeSelect} 
+                  />
                 </div>
                 
                 <div className="p-4 bg-muted/50 rounded-lg border border-muted">
                   <div className="flex items-center mb-4">
-                    {effectiveTheme === 'light' ? (
+                    {mode === 'light' ? (
                       <Sun className="h-5 w-5 mr-2 text-primary" />
                     ) : (
                       <Moon className="h-5 w-5 mr-2 text-primary" />
                     )}
                     <h3 className="font-medium">Appearance</h3>
                   </div>
-                  <Tabs defaultValue={effectiveTheme} className="w-full" onValueChange={(value) => setTheme(value as Theme)}>
+                  <Tabs defaultValue={mode} className="w-full" onValueChange={(value) => setMode(value as Theme)}>
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="light" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                         <Sun className="mr-2 h-4 w-4" />

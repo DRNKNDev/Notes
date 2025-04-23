@@ -6,7 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import useTheme from "@/hooks/use-theme";
+
+import { useThemeContext } from "@/components/theme-provider";
+import { useState } from "react";
+import { ThemeSelector, type ThemeOption } from "@/components/theme/theme-selector";
+
+// Import the themes list
+import themesList from "@/assets/themes.json";
 
 // This route serves as the settings page
 export const Route = createFileRoute('/settings')({  
@@ -20,19 +26,15 @@ export const Route = createFileRoute('/settings')({
   },
 });
 
-// Available themes
-const themes = [
-  { name: 'zinc', label: 'Zinc' },
-  { name: 'slate', label: 'Slate' },
-  { name: 'stone', label: 'Stone' },
-  { name: 'gray', label: 'Gray' },
-  { name: 'neutral', label: 'Neutral' },
-];
+
 
 function SettingsPage() {
   // Get the current settings category from URL search params
   const { category } = Route.useSearch();
-  const { theme, setTheme, mode, setMode } = useTheme();
+  const { mode, setMode, setColorTheme, currentThemeUrl, colorTheme } = useThemeContext();
+  
+  // State for available themes
+  const [availableThemes] = useState<ThemeOption[]>(themesList);
 
   return (
     <div className="h-full overflow-hidden">
@@ -171,19 +173,27 @@ function SettingsPage() {
                       <Label className="text-sm font-medium text-foreground mb-2 block">
                         Color Theme
                       </Label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                        {themes.map((themeOption) => (
-                          <Button
-                            key={themeOption.name}
-                            type="button"
-                            variant={theme === themeOption.name ? "default" : "outline"}
-                            className="h-auto flex flex-col items-center justify-center p-3 gap-2"
-                            onClick={() => setTheme(themeOption.name)}
-                          >
-                            <div className={`w-full h-12 rounded-md bg-primary`}></div>
-                            <span className="text-xs font-medium">{themeOption.label}</span>
-                          </Button>
-                        ))}
+                      
+                      <ThemeSelector
+                        themes={availableThemes}
+                        selectedTheme={availableThemes.find(theme => 
+                          (theme.url === currentThemeUrl) || 
+                          (theme.name === 'Default' && !currentThemeUrl)
+                        ) || availableThemes[0]}
+                        onThemeSelect={(theme) => {
+                          if (theme.name === 'Default' || theme.url.includes('default-theme.json')) {
+                            setColorTheme('default');
+                          } else {
+                            setColorTheme(theme.name, theme.url);
+                          }
+                        }}
+                        className="max-w-md"
+                      />
+                      
+                      <div className="mt-4">
+                        <p className="text-xs text-muted-foreground">
+                          Current theme: {colorTheme?.name || 'Default'}
+                        </p>
                       </div>
                     </div>
                     
