@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { NoteEditor } from "@/components/editor/note-editor";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { cn } from "@/lib/utils";
@@ -134,54 +134,18 @@ function NoteView() {
     };
   }, [editorMarkdown, currentTitle]); // Re-run effect when content or title changes
 
-  // Handle error states
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <p className="text-destructive mb-2">Error loading note</p>
-          <p className="text-muted-foreground text-sm mb-4">{error}</p>
-          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
-            Back to Notes
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-  
-  // Handle note not found
-  if (!note) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">Note not found</p>
-          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
-            Back to Notes
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
+  // Define all hooks first before any conditional returns
   // Handle editor content changes
-  const handleEditorChange = (newMarkdown: string) => {
-    // Update the editor markdown state
+  const handleEditorChange = useCallback((newMarkdown: string) => {
+    // Simply update the editor markdown state
     setEditorMarkdown(newMarkdown);
-  };
+  }, []);
   
   // Handle title changes separately
-  const handleTitleChange = (newTitle: string) => {
+  const handleTitleChange = useCallback((newTitle: string) => {
+    // Update the title state
     setCurrentTitle(newTitle);
-  };
+  }, []);
   
   // Save the current note
   const handleSave = async () => {
@@ -223,6 +187,47 @@ function NoteView() {
     if (!note) return;
     await deleteNoteAndNavigate(note.id);
   };
+
+  // Now handle conditional rendering after all hooks are defined
+  // Handle error states
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="text-destructive mb-2">Error loading note</p>
+          <p className="text-muted-foreground text-sm mb-4">{error}</p>
+          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
+            Back to Notes
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  
+  // Handle note not found
+  if (!note) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Note not found</p>
+          <Button variant="outline" onClick={() => navigate({ to: '/notes', search: {} })}>
+            Back to Notes
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+
 
   return (
     <div className="h-full flex flex-col relative">
