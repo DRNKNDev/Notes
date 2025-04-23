@@ -131,7 +131,9 @@ export function AppSidebarSecondary({
                           >
                             <div className="p-3 space-y-2">
                               <div className="flex items-center justify-between">
-                                <span className="font-medium truncate">{note.title}</span>
+                                <span className="font-medium">
+                                  {note.title.length > 35 ? `${note.title.substring(0, 25)}...` : note.title}
+                                </span>
                                 <span className="text-xs text-muted-foreground">
                                   {formatNoteDate(note.updatedAt || note.createdAt)}
                                 </span>
@@ -181,7 +183,9 @@ export function AppSidebarSecondary({
                       >
                         <div className="p-3 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium truncate">{note.title}</span>
+                            <span className="font-medium">
+                              {note.title.length > 35 ? `${note.title.substring(0, 25)}...` : note.title}
+                            </span>
                             <span className="text-xs text-muted-foreground">
                               {formatNoteDate(note.updatedAt || note.createdAt)}
                             </span>
