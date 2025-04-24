@@ -1,0 +1,116 @@
+name: 'Release'
+
+on:
+  workflow_dispatch:  # Allow manual triggering
+  push:
+    tags:
+      - 'v*'  # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin'
+          - platform: 'macos-latest'
+            args: '--target x86_64-apple-darwin'
+          - platform: 'windows-latest'
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: false
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__  # Will replace __VERSION__ with the app version
+          releaseName: 'DRNKN Notes v__VERSION__'
+          # The release body will be generated from the tag message and/or CHANGELOG.md if it exists
+          # If neither is available, it will use this generic template
+          releaseBody: |
+            Release notes for DRNKN Notes v__VERSION__
+            
+            For detailed changes, please see the commit history.
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
+
+  update-latest-json:
+    needs: publish-tauri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm install -g @tauri-apps/cli@next
+
+      - name: Download latest.json
+        run: |
+          mkdir -p public
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "App version: $VERSION"
+          
+          # Create updater endpoints directory structure
+          mkdir -p public/update/windows
+          mkdir -p public/update/darwin
+          
+          # Download latest.json files from the release
+          gh release download "v$VERSION" -p "*latest*.json" -D ./public/update/
+          
+          # Move files to their respective directories
+          find ./public/update -name "*-windows-x86_64-latest.json" -exec cp {} ./public/update/windows/latest.json \;
+          find ./public/update -name "*-darwin-x86_64-latest.json" -exec cp {} ./public/update/darwin/latest.json \;
+          find ./public/update -name "*-darwin-aarch64-latest.json" -exec cp {} ./public/update/darwin/aarch64-latest.json \;
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy updater endpoint
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: updater
+          force_orphan: true
