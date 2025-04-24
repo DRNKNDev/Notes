@@ -27,7 +27,6 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history for proper versioning
 
-
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
@@ -79,16 +78,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
           version: latest
           run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
           
       - name: Install dependencies
         run: pnpm add -g @tauri-apps/cli@next
