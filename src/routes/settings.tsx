@@ -163,25 +163,6 @@ function SettingsPage() {
                 </div>
                 <div className="sm:max-w-3xl md:col-span-2">
                   <div className="space-y-4">
-                    <div className="mb-6">
-                      <Label
-                        htmlFor="editor-font-size"
-                        className="text-sm font-medium text-foreground"
-                      >
-                        Editor Font Size
-                      </Label>
-                      <Select name="editor-font-size" defaultValue="medium" disabled>
-                        <SelectTrigger id="editor-font-size" className="mt-2">
-                          <SelectValue placeholder="Select font size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="small">Small</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="large">Large</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
                     <div className="flex items-center gap-x-3">
                       <Checkbox id="use-native-fullscreen" name="use-native-fullscreen" defaultChecked disabled />
                       <Label
@@ -294,8 +275,9 @@ function SettingsPage() {
                           className="h-auto flex flex-col items-center justify-center p-3 gap-2"
                           onClick={() => setMode("light")}
                         >
-                          <div className="w-full h-12 rounded-md bg-background border border-border flex items-center justify-center">
-                            <span className="text-xs">A</span>
+                          {/* Fixed light theme preview with explicit colors */}
+                          <div className="w-full h-12 rounded-md bg-white flex items-center justify-center">
+                            <span className="text-xs text-slate-900">A</span>
                           </div>
                           <span className="text-xs font-medium">Light</span>
                         </Button>
@@ -306,7 +288,8 @@ function SettingsPage() {
                           className="h-auto flex flex-col items-center justify-center p-3 gap-2"
                           onClick={() => setMode("dark")}
                         >
-                          <div className="w-full h-12 rounded-md bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                          {/* Fixed dark theme preview */}
+                          <div className="w-full h-12 rounded-md bg-zinc-800 flex items-center justify-center">
                             <span className="text-xs text-zinc-200">A</span>
                           </div>
                           <span className="text-xs font-medium">Dark</span>

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { NoteEditor } from "@/components/editor/note-editor";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Loader2, Trash, Maximize2Icon, MinimizeIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useNoteActions } from '@/hooks/use-note-actions';
 
 // This route handles displaying a specific note by its ID
 export const Route = createFileRoute('/notes/$noteId')({  
@@ -24,18 +25,21 @@ function NoteView() {
   const { 
     notes, 
     saveNote, 
-    deleteNote, 
     isLoading, 
-    error 
+    error,
+    isInitialized,
+    initializeFromStorage
   } = useNotesStore();
   
   // State for tracking if we're currently saving
   const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Get note actions from the centralized hook
+  const { deleteNoteAndNavigate, isDeleting } = useNoteActions();
   
   // State for the combined markdown content in the editor
-  // Initialize with empty string to prevent unmount on ID change
-  const [editorMarkdown, setEditorMarkdown] = useState<string>('');
+  // Initialize with null to indicate loading state
+  const [editorMarkdown, setEditorMarkdown] = useState<string | null>(null);
   
   // State for the current note title
   const [currentTitle, setCurrentTitle] = useState<string>('');
@@ -51,10 +55,27 @@ function NoteView() {
   // Find the note with the matching ID
   const note = notes.find(note => note.id === noteId) as Note | undefined;
   
+  // Ensure the notes store is initialized
+  useEffect(() => {
+    if (!isInitialized && !isLoading) {
+      initializeFromStorage();
+    }
+  }, [isInitialized, isLoading, initializeFromStorage]);
+
   // Initialize editor markdown when noteId changes
   useEffect(() => {
     // Skip if we've already loaded this note
     if (loadedNoteIdRef.current === noteId) return;
+    
+    // Skip if notes aren't loaded yet or if we're still loading
+    if (!isInitialized || isLoading) {
+      return;
+    }
+    
+    // Skip if note is not found
+    if (!note) {
+      return;
+    }
     
     // Reset initial load flag
     isInitialLoadCompleteRef.current = false;
@@ -62,33 +83,31 @@ function NoteView() {
     // Reset state when noteId changes - KEEP editorMarkdown to prevent unmount
     setCurrentTitle('');
     
-    if (note) {
-      // Mark this note as loaded
-      loadedNoteIdRef.current = noteId;
-      
-      // Construct initial editor markdown
-      const initialTitle = note.title || 'Untitled';
-      
-      // Check if bodyContent already starts with a title
-      let initialContent = note.bodyContent || '';
-      
-      // Ensure consistent line endings (convert CRLF to LF)
-      initialContent = initialContent.replace(/\r\n/g, '\n');
-      
-      // Remove any existing H1 header to prevent duplication
-      if (initialContent.trim().startsWith('# ')) {
-        // Content already has a header, use it as is
-        const initialMarkdown = initialContent;
-        setEditorMarkdown(initialMarkdown);
-      } else {
-        // Content doesn't have a header, add one
-        const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
-        setEditorMarkdown(initialMarkdown);
-      }
-      
-      setCurrentTitle(initialTitle);
+    // Mark this note as loaded
+    loadedNoteIdRef.current = noteId;
+    
+    // Construct initial editor markdown
+    const initialTitle = note.title || 'Untitled';
+    
+    // Check if bodyContent already starts with a title
+    let initialContent = note.bodyContent || '';
+    
+    // Ensure consistent line endings (convert CRLF to LF)
+    initialContent = initialContent.replace(/\r\n/g, '\n');
+    
+    // Remove any existing H1 header to prevent duplication
+    if (initialContent.trim().startsWith('# ')) {
+      // Content already has a header, use it as is
+      const initialMarkdown = initialContent;
+      setEditorMarkdown(initialMarkdown);
+    } else {
+      // Content doesn't have a header, add one
+      const initialMarkdown = `# ${initialTitle}\n\n${initialContent}`;
+      setEditorMarkdown(initialMarkdown);
     }
-  }, [noteId, note]); // Include note to ensure we have the latest data
+    
+    setCurrentTitle(initialTitle);
+  }, [noteId, note, isInitialized, isLoading]); // Include initialization state
 
   // Auto-save effect
   useEffect(() => {
@@ -115,6 +134,61 @@ function NoteView() {
     };
   }, [editorMarkdown, currentTitle]); // Re-run effect when content or title changes
 
+  // Define all hooks first before any conditional returns
+  // Handle editor content changes
+  const handleEditorChange = useCallback((newMarkdown: string) => {
+    // Simply update the editor markdown state
+    setEditorMarkdown(newMarkdown);
+  }, []);
+  
+  // Handle title changes separately
+  const handleTitleChange = useCallback((newTitle: string) => {
+    // Update the title state
+    setCurrentTitle(newTitle);
+  }, []);
+  
+  // Save the current note
+  const handleSave = async () => {
+    if (!note || editorMarkdown === null || !isInitialLoadCompleteRef.current || isSaving) return;
+    
+    try {
+      setIsSaving(true);
+      
+      // Use the full markdown content for saving
+      const noteContent = editorMarkdown;
+      
+      // Save the note - pass the noteId, content, and title separately
+      const updatedNote = await saveNote(note.id, noteContent, currentTitle);
+      
+      // If the ID changed due to title update, navigate to the new URL smoothly
+      if (updatedNote.id !== note.id) {
+        navigate({
+          to: '/notes/$noteId',
+          params: { noteId: updatedNote.id }, 
+          replace: true, 
+        });
+      }
+      
+      toast.success("Note saved successfully", {
+        description: "Your changes have been saved to disk"
+      });
+    } catch (error) {
+      console.error("Error saving note:", error);
+      toast.error("Failed to save note", {
+        description: "Please try again or check console for details"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Handle note deletion using the centralized action
+  const handleDelete = async () => {
+    if (!note) return;
+    await deleteNoteAndNavigate(note.id);
+  };
+
+  // Now handle conditional rendering after all hooks are defined
   // Handle error states
   if (error) {
     return (
@@ -153,71 +227,7 @@ function NoteView() {
     );
   }
   
-  // Handle editor content changes
-  const handleEditorChange = (newMarkdown: string) => {
-    // Update the editor markdown state
-    setEditorMarkdown(newMarkdown);
-  };
-  
-  // Handle title changes separately
-  const handleTitleChange = (newTitle: string) => {
-    setCurrentTitle(newTitle);
-  };
-  
-  // Save the current note
-  const handleSave = async () => {
-    if (!note || editorMarkdown === null || !isInitialLoadCompleteRef.current || isSaving) return;
-    
-    try {
-      setIsSaving(true);
-      
-      // Use the full markdown content for saving
-      const noteContent = editorMarkdown;
-      
-      // Save the note - pass the noteId, content, and title separately
-      const updatedNote = await saveNote(note.id, noteContent, currentTitle);
-      
-      // If the ID changed due to title update, navigate to the new URL smoothly
-      if (updatedNote.id !== note.id) {
-        navigate({
-          to: '/notes/$noteId',
-          params: { noteId: updatedNote.id }, 
-          replace: true, 
-        });
-      }
-      
-      toast.success("Note saved successfully", {
-        description: "Your changes have been saved to disk"
-      });
-    } catch (error) {
-      console.error("Error saving note:", error);
-      toast.error("Failed to save note", {
-        description: "Please try again or check console for details"
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-  
-  // Delete the current note
-  const handleDelete = async () => {
-    if (!note) return;
-    
-    try {
-      setIsDeleting(true);
-      await deleteNote(note.id);
-      toast.success("Note deleted successfully", {
-        description: "The note has been permanently removed"
-      });
-      navigate({ to: '/notes', search: {} });
-    } catch (error) {
-      console.error("Error deleting note:", error);
-      toast.error("Failed to delete note", {
-        description: "Please try again or check console for details"
-      });
-      setIsDeleting(false);
-    }
-  };
+
 
   return (
     <div className="h-full flex flex-col relative">
@@ -230,7 +240,7 @@ function NoteView() {
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleFullscreen}
-                className="h-8 w-8" // Added size class
+                className="h-8 w-8 bg-sidebar" // Added size class
               >
                 {isFullscreen ? <MinimizeIcon className="h-4 w-4" /> : <Maximize2Icon className="h-4 w-4" />}
               </Button>
@@ -251,8 +261,12 @@ function NoteView() {
           "min-h-full",
           isFullscreen ? "p-40 pt-20" : "px-6 pb-20"
         )}>
-          {/* Keep editor mounted if note exists and is loaded, even if markdown is temporarily empty during transition */}
-          {note && loadedNoteIdRef.current === noteId ? (
+          {/* Show loading indicator if notes aren't initialized yet */}
+          {!isInitialized || isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : note && loadedNoteIdRef.current === noteId && editorMarkdown !== null ? (
             <NoteEditor 
               markdown={editorMarkdown} // Pass combined markdown
               onChange={handleEditorChange} // Pass the content change handler
@@ -272,7 +286,7 @@ function NoteView() {
                 size="icon"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                className="text-destructive bg-sidebar hover:bg-destructive/10 h-8 w-8"
               >
                 {isDeleting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -284,6 +298,7 @@ function NoteView() {
             <TooltipContent side="top">
               <div className="flex items-center justify-between">
                 <p>Delete Note</p>
+                <span className="text-xs text-muted ml-2 font-mono">⌘⌫</span> 
               </div>
             </TooltipContent>
           </Tooltip>

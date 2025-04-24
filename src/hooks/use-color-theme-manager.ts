@@ -81,13 +81,13 @@ const applyThemeVariables = (theme: ColorTheme) => {
   for (const [key, value] of Object.entries(darkColors)) {
     const cssVar = `--${key}`;
     if (!PROTECTED_VARIABLES.has(cssVar)) {
-      darkStyles += `${cssVar}: ${value}; `; // Added space for clarity
+      darkStyles += `${cssVar}: ${value}; `; 
     }
   }
   darkStyles += '}';
   darkStyleSheet.textContent = darkStyles;
 
-  console.log(`Applied theme: ${theme.name} (Dark mode: ${isDarkMode})`);
+  // Applied theme: ${theme.name} (Dark mode: ${isDarkMode})
 };
 
 // Custom hook for managing color themes
@@ -97,13 +97,19 @@ export const useColorThemeManager = () => {
   const [error, setError] = useState<string | null>(null);
   // Track if we're currently applying a theme to prevent loops
   const isApplyingThemeRef = useRef(false);
+  
+  // Initialize theme key from localStorage
   const [themeKey, setThemeKey] = useState<string>(() => {
+    if (typeof window === 'undefined') return DEFAULT_THEME_KEY;
+    
     // Load saved theme key from local storage or use the default
     return localStorage.getItem('colorThemeKey') || DEFAULT_THEME_KEY;
   });
   
   // For remote themes, we'll store the URL
   const [themeUrl, setThemeUrl] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    
     return localStorage.getItem('colorThemeUrl');
   });
 
@@ -111,7 +117,6 @@ export const useColorThemeManager = () => {
   const loadTheme = useCallback(async (key: string, url?: string | null) => {
     // Prevent infinite loops if we're already applying a theme
     if (isApplyingThemeRef.current) {
-      console.log('Already applying theme, skipping loadTheme call');
       return;
     }
     

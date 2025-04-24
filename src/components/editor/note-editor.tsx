@@ -12,7 +12,7 @@ import {
 } from "@mdxeditor/editor"
 import { useThemeContext } from "@/components/theme-provider";
 import { tailwindCodeMirrorExtensions } from './codemirror-theme';
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useMemo } from 'react';
 import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
 
 /**
@@ -20,8 +20,14 @@ import { parseMarkdownWithTitle } from '@/hooks/use-markdown-title';
  * This helps prevent cursor position issues in the MDXEditor
  */
 function normalizeMarkdown(content: string | null | undefined): string {
-  console.log('normalizeMarkdown', content);
-  if (!content) return '# Default Note\n\nStart writing here...\n';
+  if (content === null || content === undefined) {
+    return '# Default Note\n\nStart writing here...\n';
+  }
+  
+  // Handle empty string case differently
+  if (content === '') {
+    return '\n';
+  }
   
   // Ensure consistent line endings (convert CRLF to LF)
   let normalized = content.replace(/\r\n/g, '\n');
@@ -56,13 +62,13 @@ export function NoteEditor({
   // Use a ref to track if we're currently handling an update to prevent circular updates
   const isUpdatingRef = useRef(false);
   
-  // Memoize the normalized markdown to prevent unnecessary re-renders
-  const safeMarkdown = useRef<string>('');
+
   
-  // Only normalize markdown when it changes
-  if (safeMarkdown.current === '' || markdown !== null) {
-    safeMarkdown.current = normalizeMarkdown(markdown);
-  }
+  // Use useMemo to properly memoize the normalized markdown
+  // This ensures normalizeMarkdown is only called when markdown actually changes
+  const safeMarkdown = useMemo(() => {
+    return normalizeMarkdown(markdown);
+  }, [markdown]);
   
   // Store the latest markdown in a ref to use in the debounced function
   const latestMarkdownRef = useRef<string>('');
@@ -104,11 +110,14 @@ export function NoteEditor({
       window.clearTimeout(debounceTimeoutRef.current);
     }
     
-    // Set a new timeout
+    // Use a longer debounce time for title edits
+    const isEditingTitle = newMarkdown.match(/^#\s+[^\n]*$/m) !== null;
+    const debounceTime = isEditingTitle ? 2000 : 500;
+    
     debounceTimeoutRef.current = window.setTimeout(() => {
       processMarkdownChange(latestMarkdownRef.current);
       debounceTimeoutRef.current = null;
-    }, 500); // 500ms debounce delay
+    }, debounceTime);
   }, [processMarkdownChange]);
   
   // Clean up the timeout on unmount
@@ -131,10 +140,9 @@ export function NoteEditor({
     <div className="flex flex-col w-full">
       <MDXEditor
       ref={editorRef}
-      markdown={safeMarkdown.current}
+      markdown={safeMarkdown}
       onChange={handleMarkdownChange}
       onError={handleError}
-      autoFocus
       plugins={
         [
           headingsPlugin(),

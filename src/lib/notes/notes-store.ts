@@ -18,8 +18,7 @@ import {
 } from "../search/lunr-search";
 import { parseMarkdownWithTitle } from "@/hooks/use-markdown-title";
 
-// Counter to track initialization attempts (for debugging)
-let initCounter = 0;
+
 
 interface NotesState {
   // Storage paths
@@ -450,10 +449,13 @@ export const useNotesStore = create<NotesState>()(
       
       // Initialize from storage - called on app startup
       initializeFromStorage: async () => {
-        // Count initialization attempts without causing re-renders
-        initCounter++;
-        console.log(`Initialization attempt #${initCounter}`);
+        // Get current state
+        const state = get();
         
+        // Prevent multiple initialization attempts
+        if (state.isLoading) {
+          return Promise.resolve();
+        }
         // Skip if already initialized or if already loading
         if (get().isInitialized || get().isLoading) {
           return;

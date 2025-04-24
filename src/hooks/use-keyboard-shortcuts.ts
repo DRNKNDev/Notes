@@ -1,23 +1,19 @@
 import { useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useNotesStore } from "@/lib/notes/notes-store";
 import { useFullscreen } from "./use-fullscreen";
+import { useNoteActions } from "./use-note-actions";
 
 export function useKeyboardShortcuts() {
-  const navigate = useNavigate();
   const { toggleFullscreen } = useFullscreen();
-  const { createNote } = useNotesStore();
-
-  // Handler for creating a new note
-  const handleCreateNewNote = async () => {
-    try {
-      const newNote = await createNote("New Note", "Write your content here...");
-      // Navigate to the new note
-      navigate({ to: '/notes/$noteId', params: { noteId: newNote.id } });
-    } catch (error) {
-      console.error("Error creating new note:", error);
-    }
-  };
+  const { 
+    createNewNote, 
+    deleteNoteAndNavigate, 
+    navigateTo 
+  } = useNoteActions();
+  
+  // Current note ID from the URL
+  const pathname = window.location.pathname;
+  const noteIdMatch = pathname.match(/\/notes\/([^/]+)$/);
+  const currentNoteId = noteIdMatch ? noteIdMatch[1] : undefined;
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -28,6 +24,16 @@ export function useKeyboardShortcuts() {
         return;
       }
       
+      // Check for Command + Delete for deleting current note
+      if (event.metaKey && !event.ctrlKey && event.key === 'Backspace') {
+        // Only if we're on a note detail page
+        if (currentNoteId) {
+          event.preventDefault();
+          deleteNoteAndNavigate(currentNoteId);
+          return;
+        }
+      }
+      
       // Check if Command (Meta) key is pressed (without Control)
       if (event.metaKey && !event.ctrlKey) {
         switch (event.key) {
@@ -35,29 +41,29 @@ export function useKeyboardShortcuts() {
           case 'N':
             // Command + N for New Note
             event.preventDefault();
-            handleCreateNewNote();
+            createNewNote();
             break;
           case '/':
             // Command + / for Prompt
             event.preventDefault();
-            navigate({ to: '/prompt' });
+            navigateTo('/prompt');
             break;
           case 'j':
           case 'J':
             // Command + J for Journal
             event.preventDefault();
-            navigate({ to: '/journal' });
+            navigateTo('/journal');
             break;
           case 'l':
           case 'L':
             // Command + L for Notes
             event.preventDefault();
-            navigate({ to: '/notes' });
+            navigateTo('/notes');
             break;
           case ',':
             // Command + , for Settings
             event.preventDefault();
-            navigate({ to: '/settings', search: { category: 'general' } });
+            navigateTo('/settings', { search: { category: 'general' } });
             break;
           default:
             // Do nothing for other key combinations
@@ -73,5 +79,5 @@ export function useKeyboardShortcuts() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigate, toggleFullscreen, handleCreateNewNote]);
+  }, [toggleFullscreen, createNewNote, deleteNoteAndNavigate, navigateTo, currentNoteId]);
 }
