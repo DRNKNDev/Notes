@@ -103,8 +103,8 @@ jobs:
           mkdir -p public/update/darwin
           
           # Download latest.json files from the release
-          # Use --clobber to overwrite files and --exit-code=0 to continue even if some patterns don't match
-          gh release download "v$VERSION" -p "*latest*.json" -D ./public/update/ --clobber --exit-code=0
+          # Use --clobber to overwrite files
+          gh release download "v$VERSION" -p "*latest*.json" -D ./public/update/ --clobber || true
           
           # List what was downloaded
           echo "Downloaded files:"
