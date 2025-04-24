@@ -28,17 +28,17 @@ jobs:
           fetch-depth: 0  # Fetch all history for proper versioning
 
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'pnpm'
-
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
           version: latest
           run_install: false
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -51,7 +51,7 @@ jobs:
           workspaces: './src-tauri -> target'
 
       - name: Install frontend dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
@@ -84,8 +84,14 @@ jobs:
         with:
           node-version: 'lts/*'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: false
+          
       - name: Install dependencies
-        run: npm install -g @tauri-apps/cli@next
+        run: pnpm add -g @tauri-apps/cli@next
 
       - name: Download latest.json
         run: |
