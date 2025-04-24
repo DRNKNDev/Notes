@@ -43,10 +43,10 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "http://localhost:8000/{{target}}/{{current_version}}"
+        "https://drnkndev.github.io/Notes/update/{{target}}/latest.json"
       ],
       "dialog": false,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZCODU4NzE0NzUwRDY2QkQKUldTOVpnMTFGSWVGYXl0eE80Y3Fma1hYSVVQRXZoZnNZeHBIY0dSNnp0VVE1aXMvL21Pa0p0NksK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJERTIzN0UyOUJGNjc3RDIKUldUU2QvYWI0amZpdmJ6TWpDc2RDSTFvUVFWVmFwMXdlejRnUGZmSlJpZ0YwcGN2YVdTeXg0MGQK"
     }
   }
 }
