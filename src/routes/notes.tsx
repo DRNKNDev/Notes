@@ -30,20 +30,22 @@ function NotesLayout() {
     }
   }, [isInitialized, isLoading, initializeFromStorage]);
   
-  // Check if we're on a note detail route with a noteId param
-  const pathname = window.location.pathname;
-  const noteIdMatch = pathname.match(/\/notes\/([^/]+)$/);
+  // Use router to get current route info instead of window.location
+  // This ensures we have the correct route info after navigation
+  const currentRoute = router.state.location.pathname;
+  const noteIdMatch = currentRoute.match(/\/notes\/([^/]+)$/);
   const noteId = noteIdMatch ? noteIdMatch[1] : undefined;
   const hasNoteId = !!noteId;
   
   // Redirect to the first note if no note is selected and notes are loaded
   useEffect(() => {
-    if (!hasNoteId && isInitialized && !isLoading && notes.length > 0) {
+    // Only redirect if we're at exactly /notes (not a sub-route) and have notes
+    if (currentRoute === '/notes' && isInitialized && !isLoading && notes.length > 0) {
       // Find the first note to redirect to
       const firstNote = notes[0];
       navigate({ to: `/notes/${firstNote.id}` });
     }
-  }, [hasNoteId, notes, isInitialized, isLoading, navigate]);
+  }, [currentRoute, notes, isInitialized, isLoading, navigate]);
   
   // Show loading state while initializing
   if (!isInitialized || isLoading) {
@@ -63,10 +65,9 @@ function NotesLayout() {
           No notes found. Create a new note to get started.
         </div>
       ) : (
-        <div className="flex items-center justify-center h-full text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin mr-2" />
-          Loading note...
-        </div>
+        // This is a transitional state that should be very brief
+        // We're showing the outlet instead of a loading indicator to prevent flashing
+        <Outlet />
       )}
     </div>
   );
