@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "drnkn-notes",
+  "productName": "DRNKN Notes",
   "version": "0.1.0",
   "identifier": "dev.drnkn.notes",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "drnkn-notes",
+        "title": "DRNKN Notes",
         "width": 800,
         "height": 600,
         "decorations": false,
