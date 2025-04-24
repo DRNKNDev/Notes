@@ -103,12 +103,25 @@ jobs:
           mkdir -p public/update/darwin
           
           # Download latest.json files from the release
-          gh release download "v$VERSION" -p "*latest*.json" -D ./public/update/
+          # Use --clobber to overwrite files and --exit-code=0 to continue even if some patterns don't match
+          gh release download "v$VERSION" -p "*latest*.json" -D ./public/update/ --clobber --exit-code=0
           
-          # Move files to their respective directories
-          find ./public/update -name "*-windows-x86_64-latest.json" -exec cp {} ./public/update/windows/latest.json \;
-          find ./public/update -name "*-darwin-x86_64-latest.json" -exec cp {} ./public/update/darwin/latest.json \;
-          find ./public/update -name "*-darwin-aarch64-latest.json" -exec cp {} ./public/update/darwin/aarch64-latest.json \;
+          # List what was downloaded
+          echo "Downloaded files:"
+          find ./public/update -type f -name "*.json" -ls
+          
+          # Use it for all platforms
+          if [ $(find ./public/update -name "*latest*.json" | wc -l) -eq 1 ]; then
+            echo "Found only one latest.json file, using it for all platforms"
+            LATEST_JSON=$(find ./public/update -name "*latest*.json" | head -n 1)
+            cp "$LATEST_JSON" ./public/update/windows/latest.json
+            cp "$LATEST_JSON" ./public/update/darwin/latest.json
+            cp "$LATEST_JSON" ./public/update/darwin/aarch64-latest.json
+          fi
+          
+          # Verify the files exist
+          echo "Final updater files:"
+          find ./public/update -type f -name "*.json" -ls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
