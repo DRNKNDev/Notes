@@ -75,6 +75,8 @@ jobs:
   update-latest-json:
     needs: publish-tauri
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -92,36 +94,64 @@ jobs:
       - name: Install dependencies
         run: pnpm add -g @tauri-apps/cli@next
 
-      - name: Download latest.json
+      - name: Download and prepare update files
         run: |
           mkdir -p public
           VERSION=$(node -e "console.log(require('./package.json').version)")
           echo "App version: $VERSION"
           
           # Create updater endpoints directory structure
-          mkdir -p public/update/windows
-          mkdir -p public/update/darwin
+          mkdir -p public/update
           
-          # Download latest.json files from the release
-          # Use --clobber to overwrite files
+          # Download latest.json file from the release
           gh release download "v$VERSION" -p "*latest*.json" -D ./public/update/ --clobber || true
           
           # List what was downloaded
           echo "Downloaded files:"
           find ./public/update -type f -name "*.json" -ls
           
-          # Use it for all platforms
+          # Validate and process the latest.json file
           if [ $(find ./public/update -name "*latest*.json" | wc -l) -eq 1 ]; then
-            echo "Found only one latest.json file, using it for all platforms"
+            echo "Found latest.json file, validating format..."
             LATEST_JSON=$(find ./public/update -name "*latest*.json" | head -n 1)
-            cp "$LATEST_JSON" ./public/update/windows/latest.json
-            cp "$LATEST_JSON" ./public/update/darwin/latest.json
-            cp "$LATEST_JSON" ./public/update/darwin/aarch64-latest.json
+            
+            # Validate JSON structure
+            if ! jq . "$LATEST_JSON" > /dev/null 2>&1; then
+              echo "Error: Invalid JSON format in $LATEST_JSON"
+              exit 1
+            fi
+            
+            # Ensure the file has the required fields for Tauri v2
+            if ! jq -e '.version and .platforms' "$LATEST_JSON" > /dev/null 2>&1; then
+              echo "Error: latest.json is missing required fields (version and/or platforms)"
+              exit 1
+            fi
+            
+            # Copy to the public directory for serving
+            cp "$LATEST_JSON" ./public/update/latest.json
+            
+            # Verify the platform entries
+            echo "Verifying platform entries in latest.json..."
+            PLATFORMS=$(jq -r '.platforms | keys[]' "$LATEST_JSON")
+            for platform in $PLATFORMS; do
+              echo "✓ Found platform: $platform"
+              # Verify URL and signature exist for each platform
+              if ! jq -e ".platforms[\"$platform\"].url and .platforms[\"$platform\"].signature" "$LATEST_JSON" > /dev/null 2>&1; then
+                echo "Warning: Platform $platform is missing required URL or signature field"
+              fi
+            done
+          else
+            echo "No latest.json file found or multiple files found. Please ensure a single latest.json file is included in the release."
+            exit 1
           fi
           
-          # Verify the files exist
-          echo "Final updater files:"
+          # Final verification
+          echo "Final updater file:"
           find ./public/update -type f -name "*.json" -ls
+          
+          # Display content summary
+          echo "Content summary of latest.json:"
+          jq '{version, notes, platforms: (.platforms | keys)}' ./public/update/latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
