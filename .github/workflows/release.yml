@@ -71,6 +71,7 @@ jobs:
           prerelease: false
           includeUpdaterJson: true
           args: ${{ matrix.args }}
+          macosPackage: "zip"
 
   update-latest-json:
     needs: publish-tauri
