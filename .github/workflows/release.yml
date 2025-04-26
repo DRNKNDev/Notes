@@ -127,9 +127,6 @@ jobs:
               exit 1
             fi
             
-            # Copy to the public directory for serving
-            cp "$LATEST_JSON" ./public/update/latest.json
-            
             # Verify the platform entries
             echo "Verifying platform entries in latest.json..."
             PLATFORMS=$(jq -r '.platforms | keys[]' "$LATEST_JSON")
