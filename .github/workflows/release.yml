@@ -72,32 +72,23 @@ jobs:
           includeUpdaterJson: true
           args: ${{ matrix.args }}
           
-      - name: Zip macOS app bundle
+      - name: Remove quarantine attributes from macOS DMG
         if: matrix.platform == 'macos-latest'
         run: |
-          VERSION=$(node -e "console.log(require('./package.json').version)")
-          ARCH=$(echo "${{ matrix.args }}" | grep -o 'x86_64\|aarch64' || echo "universal")
-          
           cd src-tauri/target
           
-          # Find the .app file
-          APP_PATH=$(find . -name "*.app" -type d | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            echo "No .app file found"
+          # Find the DMG file
+          DMG_PATH=$(find . -name "*.dmg" -type f | head -n 1)
+          if [ -z "$DMG_PATH" ]; then
+            echo "No DMG file found"
             exit 1
           fi
           
-          APP_NAME=$(basename "$APP_PATH")
-          ZIP_NAME="${APP_NAME%.app}-$ARCH-v$VERSION.zip"
+          echo "Found DMG file: $DMG_PATH"
           
-          # Create zip file
-          echo "Creating $ZIP_NAME from $APP_PATH"
-          ditto -c -k --keepParent "$APP_PATH" "$ZIP_NAME"
-          
-          # Upload to release
-          gh release upload "v$VERSION" "$ZIP_NAME" --clobber
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Remove any quarantine attributes that might be present
+          echo "Removing quarantine attributes..."
+          xattr -cr "$DMG_PATH"
 
   update-latest-json:
     needs: publish-tauri
