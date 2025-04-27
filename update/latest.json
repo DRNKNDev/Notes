@@ -1,0 +1,19 @@
+{
+  "version": "0.1.13",
+  "notes": "Release notes for DRNKN Notes v0.1.13\n\nFor detailed changes, please see the commit history.",
+  "pub_date": "2025-04-27T11:59:34.974Z",
+  "platforms": {
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUU2QvYWI0amZpdldRRE9wZmZWNUVwV2ZDankxWlhvWGhXNzB3QXNseVNKS2NsRHZPWnkxTGFXUEVGWGFZQ2FJSUdhdnQ5MG40bXhSYml3aWhEeFFsTGlMRmdpY0FVYndnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1NzU0ODQ2CWZpbGU6RFJOS04gTm90ZXMuYXBwLnRhci5nego2c21hTk9LcHNQTzZNaWp3dVZXNWZPT01kUUhhRTlhWGtMNGc0MVpLdmcyaHFGYlZlbTBBRmhBY3pjbXFRVThUS1NlaEhabzFlM3NHdngvNWlsdFhBUT09Cg==",
+      "url": "https://github.com/DRNKNDev/Notes/releases/download/v0.1.13/DRNKN.Notes_x64.app.tar.gz"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUU2QvYWI0amZpdmI4KzVLTkl2SFRONGpvVVB1NCtSSlpSblNjN0IvWEh4M2xtNlZPYmtWbnNTQ3lxc2REakxvYzByTnJ0eWNGbGZ3MzJtMDhXQzdvKzB1ZmNFSWpBZkE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1NzU0ODUwCWZpbGU6RFJOS04gTm90ZXMuYXBwLnRhci5negphcVFVUjdvT291UE10TzNyZHhDb2ZNVG5LRmYyU3VMbllqNEEvMnM3eGUza0l0Q1VHdlpmelJ6dVBQa3lVMElCdE5JaE1kenJNek1oU3h6VzBMTDFDQT09Cg==",
+      "url": "https://github.com/DRNKNDev/Notes/releases/download/v0.1.13/DRNKN.Notes_aarch64.app.tar.gz"
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUU2QvYWI0amZpdlhTZ1hPU3R0cWg0SmNZS3RNQmV3OFZlb0hrTnhJVkt4elVXcUU0TWxUdW8zY0ptcTRZd1ZFbUVNWkk2WVZUUVZLbUJ3ZDJzY0NaMk05VmdqcUYrTVEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQ1NzU1MTcyCWZpbGU6RFJOS04gTm90ZXNfMC4xLjEzX3g2NF9lbi1VUy5tc2kKZzBRSmkvYjRJTzgwbzJvR0NWNHhTbm9IK2drYlpaZ29aU0kySU1raHZ1WklxQm1IWklzWlZ2dFcyN1lpQ3M0cWFPa2g0c2pjTUkvaEVyMUJQQnNFQ1E9PQo=",
+      "url": "https://github.com/DRNKNDev/Notes/releases/download/v0.1.13/DRNKN.Notes_0.1.13_x64_en-US.msi"
+    }
+  }
+}
