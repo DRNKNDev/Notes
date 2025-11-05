@@ -1,4 +1,4 @@
-import { useMatches, Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,81 +10,59 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useNotesStore } from "@/lib/notes/notes-store";
+import { format } from "date-fns";
 
 export function AppHeader() {
-  // Always call hooks at the top level
-  const matches = useMatches();
+  // Use TanStack Router for consistent route access
   const routerState = useRouterState();
-  const { isFullscreen } = useFullscreen()
-  const { notes } = useNotesStore()
-  
-  // Get route parameters safely
-  const currentRouteMatch = routerState.matches[routerState.matches.length - 1];
-  const params = currentRouteMatch?.params || {};
+  const { notes } = useNotesStore();
+
+  // Get route information
+  const currentMatch = routerState.matches[routerState.matches.length - 1];
+  const pathname = routerState.location.pathname;
+  const params = currentMatch?.params || {};
+  const search = currentMatch?.search || {};
+
+  // Extract route parameters
   const noteId = 'noteId' in params ? String(params.noteId) : undefined;
   const entryId = 'entryId' in params ? String(params.entryId) : undefined;
-  
-  // Get settings category
-  const settingsCategory = 
-    currentRouteMatch?.pathname.startsWith('/settings') && 
-    currentRouteMatch.search && 
-    'category' in currentRouteMatch.search && 
-    currentRouteMatch.search.category === 'themes' ? 'themes' : 'general';
-  
-  // Get the current route path (for breadcrumb and header title)
-  const currentRoute = matches.length > 0 ? matches[matches.length - 1] : null;
-  const routePath = currentRoute?.pathname || "/";
-  
-  // Determine if we should hide the sidebar trigger based on the route
-  const hideSecondarySidebar = routePath === "/prompt";
-  
-  // Get a user-friendly title for the current route
-  const getRouteTitle = () => {
-    if (routePath.startsWith("/prompt")) return "Prompt your Notes";
-    if (routePath.startsWith("/journal")) {
-      if (entryId) {
-        // Sample data for journal entries - in a real app, this would be fetched from a data store
-        const entries = [
-          { id: "1", title: "Today's Journal" },
-          { id: "2", title: "Yesterday's Journal" },
-          { id: "3", title: "Weekly Reflection" },
-          { id: "4", title: "Monthly Review" },
-        ];
-        const entry = entries.find(e => e.id === entryId);
-        return entry ? entry.title : "Today's Journal";
-      }
-      return "Journal";
+  const settingsCategory = 'category' in search ? String(search.category) : 'general';
+
+  // Determine if we should show the sidebar trigger
+  const showSidebarTrigger = !pathname.startsWith("/prompt") && !pathname.startsWith("/journal");
+
+  // Get the current note title from the actual notes store
+  const currentNote = noteId ? notes.find(n => n.id === noteId) : undefined;
+
+  // Format journal entry date for display
+  const formatJournalDate = (dateId: string) => {
+    try {
+      const date = new Date(dateId);
+      return format(date, "MMMM d, yyyy");
+    } catch {
+      return "Today's Journal";
     }
-    if (routePath.startsWith("/notes")) {
-      if (noteId) {
-        // Sample data for notes - in a real app, this would be fetched from a data store
-        const notes = [
-          { id: "1", title: "Meeting Tomorrow" },
-          { id: "2", title: "Project Update" },
-          { id: "3", title: "Weekend Plans" },
-          { id: "4", title: "Important Announcement" },
-        ];
-        const note = notes.find(n => n.id === noteId);
-        return note ? note.title : "Note";
-      }
-      return "Notes";
-    }
-    if (routePath.startsWith("/settings")) {
-      return "Settings";
-    }
-    return "Notes"; // Default
   };
 
-  // If in fullscreen mode, don't render the header
-  if (isFullscreen) {
-    return null;
-  }
+  // Get breadcrumb title based on route
+  const getBreadcrumbTitle = () => {
+    if (pathname.startsWith("/prompt")) return "Prompt your Notes";
+    if (pathname.startsWith("/journal")) {
+      return entryId ? formatJournalDate(entryId) : "Journal";
+    }
+    if (pathname.startsWith("/notes")) {
+      return currentNote?.title || "Note";
+    }
+    if (pathname.startsWith("/settings")) {
+      return settingsCategory === 'themes' ? 'Themes' : 'General';
+    }
+    return "Notes";
+  };
 
   return (
     <header className="sticky top-0 flex h-10 shrink-0 items-center gap-2 border-b border-muted bg-background p-2 z-10">
-      {!hideSecondarySidebar && (
+      {showSidebarTrigger && (
         <>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -102,7 +80,7 @@ export function AppHeader() {
       )}
       <Breadcrumb>
         <BreadcrumbList>
-          {routePath.startsWith("/settings") ? (
+          {pathname.startsWith("/settings") ? (
             // Settings breadcrumb
             <>
               <BreadcrumbItem className="hidden md:block text-xs">
@@ -118,7 +96,7 @@ export function AppHeader() {
               </BreadcrumbItem>
             </>
           ) : (
-            // Notes breadcrumb
+            // Default breadcrumb for notes, journal, prompt
             <>
               <BreadcrumbItem className="hidden md:block text-xs">
                 <BreadcrumbLink asChild>
@@ -128,12 +106,7 @@ export function AppHeader() {
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs">
-                  {routePath.startsWith("/notes") && noteId ? (
-                    // Find the actual note title
-                    notes.find(note => note.id === noteId)?.title || "Note"
-                  ) : (
-                    getRouteTitle()
-                  )}
+                  {getBreadcrumbTitle()}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </>

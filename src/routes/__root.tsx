@@ -1,7 +1,7 @@
 import { Outlet, createRootRoute, useMatches } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { WindowControls } from "@/components/ui/window-controls";
-import { RootLayout } from "@/components/layout/root-layout";
+import { AppLayout } from "@/components/layout/app-layout";
 import { useAppUpdater } from "@/lib/updater";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
@@ -51,15 +51,13 @@ export const Route = createRootRoute({
           </div>
         </div>
         
-        {/* Conditionally render either OnboardingLayout or RootLayout */}
+        {/* Conditionally render either OnboardingLayout or AppLayout */}
         {isOnboarding ? (
           <div className="flex-1 overflow-hidden">
             <Outlet />
           </div>
         ) : (
-          <RootLayout>
-            <Outlet />
-          </RootLayout>
+          <AppLayout />
         )}
         
         {/* Show devtools in development unless explicitly disabled */}

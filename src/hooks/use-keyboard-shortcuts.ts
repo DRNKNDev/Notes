@@ -1,26 +1,39 @@
 import { useEffect } from 'react';
+import { useRouterState } from '@tanstack/react-router';
 import { useFullscreen } from "./use-fullscreen";
+import { useDistractionFree } from "./use-distraction-free";
 import { useNoteActions } from "./use-note-actions";
 
 export function useKeyboardShortcuts() {
   const { toggleFullscreen } = useFullscreen();
-  const { 
-    createNewNote, 
-    deleteNoteAndNavigate, 
-    navigateTo 
+  const { toggleDistractionFree } = useDistractionFree();
+  const {
+    createNewNote,
+    deleteNoteAndNavigate,
+    navigateTo
   } = useNoteActions();
-  
-  // Current note ID from the URL
-  const pathname = window.location.pathname;
-  const noteIdMatch = pathname.match(/\/notes\/([^/]+)$/);
-  const currentNoteId = noteIdMatch ? noteIdMatch[1] : undefined;
+
+  // Use TanStack Router for consistent route access
+  const routerState = useRouterState();
+  const currentMatch = routerState.matches[routerState.matches.length - 1];
+  const currentNoteId =
+    currentMatch?.params && 'noteId' in currentMatch.params
+      ? String(currentMatch.params.noteId)
+      : undefined;
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Control+Command+F for fullscreen
+      // Check for Control+Command+F for browser fullscreen
       if (event.metaKey && event.ctrlKey && (event.key === 'f' || event.key === 'F')) {
         event.preventDefault();
         toggleFullscreen();
+        return;
+      }
+
+      // Check for Command+Shift+F for distraction-free mode
+      if (event.metaKey && event.shiftKey && (event.key === 'f' || event.key === 'F')) {
+        event.preventDefault();
+        toggleDistractionFree();
         return;
       }
       
@@ -79,5 +92,5 @@ export function useKeyboardShortcuts() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [toggleFullscreen, createNewNote, deleteNoteAndNavigate, navigateTo, currentNoteId]);
+  }, [toggleFullscreen, toggleDistractionFree, createNewNote, deleteNoteAndNavigate, navigateTo, currentNoteId]);
 }

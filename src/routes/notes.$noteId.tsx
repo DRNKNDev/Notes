@@ -22,45 +22,38 @@ function NoteView() {
   const navigate = useNavigate();
   
   // Get notes and actions from the store
-  const { 
-    notes, 
-    saveNote, 
-    isLoading, 
+  // Note: initialization is now handled in AppLayout
+  const {
+    notes,
+    saveNote,
+    isLoading,
     error,
-    isInitialized,
-    initializeFromStorage
+    isInitialized
   } = useNotesStore();
-  
+
   // State for tracking if we're currently saving
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Get note actions from the centralized hook
   const { deleteNoteAndNavigate, isDeleting } = useNoteActions();
-  
+
   // State for the combined markdown content in the editor
   // Initialize with null to indicate loading state
   const [editorMarkdown, setEditorMarkdown] = useState<string | null>(null);
-  
+
   // State for the current note title
   const [currentTitle, setCurrentTitle] = useState<string>('');
-  
+
   // Track if we've already loaded this note to prevent double loading
   const loadedNoteIdRef = useRef<string | null>(null);
   // Ref to track if the initial load is complete to prevent auto-save on mount
   const isInitialLoadCompleteRef = useRef(false);
-  
+
   // Get fullscreen state and toggle function
   const { isFullscreen, toggleFullscreen } = useFullscreen();
-  
+
   // Find the note with the matching ID
   const note = notes.find(note => note.id === noteId) as Note | undefined;
-  
-  // Ensure the notes store is initialized
-  useEffect(() => {
-    if (!isInitialized && !isLoading) {
-      initializeFromStorage();
-    }
-  }, [isInitialized, isLoading, initializeFromStorage]);
 
   // Initialize editor markdown when noteId changes
   useEffect(() => {

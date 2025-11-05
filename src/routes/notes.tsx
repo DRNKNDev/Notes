@@ -14,21 +14,12 @@ function NotesLayout() {
   const router = useRouter();
   const navigate = router.navigate;
   
-  // Access notes store - only get what we need
-  const { 
-    isLoading, 
+  // Access notes store - initialization is now handled in AppLayout
+  const {
+    isLoading,
     isInitialized,
-    initializeFromStorage,
     notes
   } = useNotesStore();
-  
-  // Initialize store on component mount - this will only run once
-  useEffect(() => {
-    // Only attempt to initialize if not already initialized
-    if (!isInitialized && !isLoading) {
-      initializeFromStorage();
-    }
-  }, [isInitialized, isLoading, initializeFromStorage]);
   
   // Use router to get current route info instead of window.location
   // This ensures we have the correct route info after navigation
